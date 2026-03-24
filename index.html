@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conflict Intelligence Dashboard — Iran–US War · Mar 24, 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ─────────────────────────────────────────────────── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080808;
+  --s1:#101010;
+  --s2:#161616;
+  --s3:#1c1c1c;
+  --b1:#1e1e1e;
+  --b2:#272727;
+  --b3:#333;
+  --t1:#efefef;
+  --t2:#8a8a8a;
+  --t3:#484848;
+  --red:#f05252;
+  --orange:#fb923c;
+  --yellow:#facc15;
+  --green:#4ade80;
+  --teal:#22d3ee;
+  --indigo:#818cf8;
+  --r:6px;--rs:4px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--t1);font-family:'Inter',-apple-system,system-ui,sans-serif;font-size:14px;line-height:1.5;min-height:100vh;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+a{color:inherit;text-decoration:none}
+
+/* ── TOPBAR ─────────────────────────────────────────────────── */
+.topbar{
+  position:sticky;top:0;z-index:200;
+  height:50px;
+  background:rgba(8,8,8,0.92);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--b1);
+  padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.topbar-l{display:flex;align-items:center;gap:14px}
+.brand{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t1)}
+.pipe{color:var(--b3)}
+.topbar-status{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2)}
+.topbar-r{display:flex;align-items:center;gap:8px}
+.ts{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3)}
+.btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 12px;border-radius:var(--rs);
+  font-size:11px;font-weight:500;cursor:pointer;
+  border:1px solid var(--b2);background:var(--s2);color:var(--t2);
+  transition:all .14s;font-family:inherit;
+}
+.btn:hover{background:var(--s3);color:var(--t1)}
+
+/* ── LIVE DOT ──────────────────────────────────────────────── */
+.dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 2.2s ease-in-out infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(240,82,82,.4)}50%{opacity:.5;box-shadow:0 0 0 5px rgba(240,82,82,0)}}
+
+/* ── MAIN ──────────────────────────────────────────────────── */
+.wrap{max-width:1280px;margin:0 auto;padding:32px 24px 100px}
+
+/* ── PAGE HEADER ───────────────────────────────────────────── */
+.page-hdr{display:grid;grid-template-columns:1fr auto;align-items:start;gap:24px;margin-bottom:28px}
+.page-title{font-size:clamp(24px,3.5vw,38px);font-weight:700;letter-spacing:-.025em;line-height:1.1}
+.page-title em{font-style:normal;color:var(--red)}
+.page-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);margin-top:8px;letter-spacing:.07em;text-transform:uppercase}
+.day-badge{text-align:right}
+.day-num{font-size:clamp(48px,7vw,80px);font-weight:800;letter-spacing:-.05em;line-height:1;color:var(--b2)}
+.day-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.1em}
+
+/* ── HERO CARDS ────────────────────────────────────────────── */
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.hero-card{
+  background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);
+  padding:24px 24px 20px;position:relative;overflow:hidden;
+}
+.hero-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.hero-card.a::after{background:var(--yellow)}
+.hero-card.w::after{background:var(--green)}
+.hc-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--t3);margin-bottom:14px}
+.hc-val{font-size:60px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.hc-val.a{color:var(--yellow)}
+.hc-val.w{color:var(--green)}
+.hc-sub{font-size:12px;color:var(--t2);margin-top:8px;line-height:1.55}
+.hc-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  padding:3px 8px;border-radius:100px;margin-top:10px;
+}
+.hc-badge.dn{background:rgba(74,222,128,.08);color:var(--green);border:1px solid rgba(74,222,128,.18)}
+.hc-badge.up{background:rgba(240,82,82,.1);color:var(--red);border:1px solid rgba(240,82,82,.2)}
+
+/* ── STAT STRIP ────────────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:32px}
+.stat{background:var(--s1);padding:14px 16px}
+.stat-n{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
+.stat-v{font-size:15px;font-weight:700;letter-spacing:-.02em}
+.c-red{color:var(--red)}.c-or{color:var(--orange)}.c-yl{color:var(--yellow)}.c-gr{color:var(--green)}.c-tl{color:var(--teal)}.c-wh{color:var(--t1)}
+
+/* ── SECTION HDR ───────────────────────────────────────────── */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--b1)}
+.sh-t{font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px}
+.sh-m{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3)}
+.badge{
+  font-family:'JetBrains Mono',monospace;font-size:8px;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:2px 7px;border-radius:100px;
+}
+.badge.live{background:rgba(240,82,82,.1);color:var(--red);border:1px solid rgba(240,82,82,.2)}
+.badge.info{background:rgba(129,140,248,.1);color:var(--indigo);border:1px solid rgba(129,140,248,.2)}
+
+/* ── TODAY TERMINAL ────────────────────────────────────────── */
+.terminal{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:32px}
+.terminal-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 20px;background:var(--s2);border-bottom:1px solid var(--b1);
+}
+.terminal-hdr-l{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600}
+.terminal-ts{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3)}
+
+.t-row{
+  display:grid;grid-template-columns:64px 76px 1fr;
+  border-bottom:1px solid var(--b1);
+  transition:background .1s;
+}
+.t-row:last-child{border-bottom:none}
+.t-row:hover{background:var(--s2)}
+.t-time{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t3);
+  padding:13px 0 13px 18px;display:flex;align-items:flex-start;padding-top:15px;
+  white-space:nowrap;
+}
+.t-tag-cell{padding:12px 10px;display:flex;align-items:flex-start;padding-top:15px}
+.tag{
+  font-family:'JetBrains Mono',monospace;font-size:8px;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 7px;border-radius:100px;white-space:nowrap;
+}
+.tag.intercept{background:rgba(240,82,82,.12);color:var(--red);border:1px solid rgba(240,82,82,.22)}
+.tag.diplo{background:rgba(129,140,248,.12);color:var(--indigo);border:1px solid rgba(129,140,248,.22)}
+.tag.econ{background:rgba(250,204,21,.1);color:var(--yellow);border:1px solid rgba(250,204,21,.2)}
+.tag.intel{background:rgba(34,211,238,.1);color:var(--teal);border:1px solid rgba(34,211,238,.2)}
+.tag.mil{background:rgba(251,146,60,.12);color:var(--orange);border:1px solid rgba(251,146,60,.22)}
+.tag.breaking{background:rgba(240,82,82,.18);color:var(--red);border:1px solid rgba(240,82,82,.35);font-weight:600}
+.t-content{padding:12px 20px 13px 0}
+.t-hl{font-size:13px;font-weight:500;color:var(--t1);margin-bottom:3px}
+.t-detail{font-size:12px;color:var(--t2);line-height:1.55}
+
+/* ── CHART GRID ────────────────────────────────────────────── */
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:32px}
+.chart-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden}
+.chart-hdr{padding:12px 18px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between}
+.chart-ttl{font-size:12px;font-weight:600}
+.chart-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2)}
+.chart-body{padding:14px 16px 10px}
+svg.ch{width:100%;height:160px;display:block}
+
+/* ── LIVE FEED ─────────────────────────────────────────────── */
+.feed-wrap{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:32px}
+.feed-hdr{padding:12px 20px;background:var(--s2);border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between}
+.spinner{width:13px;height:13px;border:2px solid var(--b2);border-top-color:var(--indigo);border-radius:50%;animation:spin .75s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.feed-loading{display:flex;align-items:center;gap:8px;padding:18px 20px;color:var(--t3);font-size:12px;font-family:'JetBrains Mono',monospace}
+.news-item{padding:13px 20px;border-bottom:1px solid var(--b1);transition:background .1s;cursor:pointer}
+.news-item:last-child{border-bottom:none}
+.news-item:hover{background:var(--s2)}
+.news-title{font-size:13px;font-weight:500;color:var(--t1);margin-bottom:4px;line-height:1.4}
+.news-meta{display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3)}
+.news-src{color:var(--indigo)}
+.feed-msg{padding:18px 20px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t3);line-height:1.7;text-align:center}
+
+/* ── TABS ──────────────────────────────────────────────────── */
+.tabs{display:flex;gap:2px;padding:4px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);margin-bottom:12px}
+.tab{
+  flex:1;padding:7px 12px;border-radius:calc(var(--r) - 2px);
+  font-size:12px;font-weight:500;cursor:pointer;
+  background:transparent;border:none;color:var(--t2);
+  font-family:inherit;text-align:center;transition:all .14s;
+}
+.tab.active{background:var(--s3);color:var(--t1)}
+.tab:hover:not(.active){color:var(--t1)}
+
+/* ── SCALE LEGEND ──────────────────────────────────────────── */
+.scale{
+  display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  padding:10px 16px;background:var(--s1);border:1px solid var(--b1);
+  border-radius:var(--r);margin-bottom:12px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);
+}
+.scale-lbl{color:var(--t3);font-weight:600}
+.sc{display:flex;align-items:center;gap:5px}
+.sc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── TIMELINE CARD ─────────────────────────────────────────── */
+.timeline{display:flex;flex-direction:column;gap:2px}
+.tl{
+  background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);
+  border-left:2px solid transparent;overflow:hidden;
+  transition:border-left-color .14s;
+}
+.tl.tl-critical{border-left-color:var(--red)}
+.tl.tl-high{border-left-color:var(--orange)}
+.tl.tl-medium{border-left-color:var(--yellow)}
+.tl.tl-low{border-left-color:var(--green)}
+.tl.tl-ceasefire{border-left-color:var(--teal)}
+.tl.tl-today{
+  border-color:var(--indigo);background:rgba(129,140,248,.03);
+}
+.tl-main{
+  display:grid;grid-template-columns:88px 68px 1fr 28px;
+  align-items:center;gap:12px;padding:13px 14px;cursor:pointer;
+}
+.tl-date{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t3);line-height:1.6}
+.tl-today-tag{font-size:9px;color:var(--indigo);letter-spacing:.07em;text-transform:uppercase;margin-top:2px}
+.tl-scores{display:flex;flex-direction:column;gap:5px}
+.tl-score{font-size:22px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.sc-red{color:var(--red)}.sc-or{color:var(--orange)}.sc-yl{color:var(--yellow)}.sc-gr{color:var(--green)}.sc-tl{color:var(--teal)}
+.tl-bar{width:100%;height:3px;background:var(--b2);border-radius:2px;overflow:hidden}
+.tl-bar-fill{height:100%;border-radius:2px;transition:width .6s}
+.tl-body{min-width:0}
+.tl-hl{
+  font-size:13px;font-weight:500;color:var(--t1);margin-bottom:3px;
+  display:flex;align-items:center;gap:7px;flex-wrap:wrap;line-height:1.4;
+}
+.otag{
+  font-family:'JetBrains Mono',monospace;font-size:8px;
+  letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:3px;
+}
+.otag.hit{background:rgba(240,82,82,.15);color:var(--red)}
+.otag.partial{background:rgba(251,146,60,.15);color:var(--orange)}
+.otag.intercepted{background:rgba(74,222,128,.1);color:var(--green)}
+.otag.none{background:rgba(34,211,238,.1);color:var(--teal)}
+.tl-sum{font-size:11.5px;color:var(--t2);line-height:1.55}
+.tl-arr{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--t3);transition:transform .18s;text-align:right;user-select:none}
+.tl.open .tl-arr{transform:rotate(45deg);color:var(--t2)}
+
+.tl-detail{
+  display:none;
+  padding:0 14px 14px;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.tl.open .tl-detail{display:grid}
+.dg{background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);padding:11px}
+.dg-t{
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px;
+  padding-bottom:6px;border-bottom:1px solid var(--b1);
+}
+.dg-t.neg{color:var(--red)}.dg-t.pos{color:var(--green)}
+.di{font-size:11.5px;color:var(--t2);line-height:1.5;padding:3px 0 3px 14px;position:relative}
+.di::before{content:'›';position:absolute;left:2px;color:var(--t3)}
+.di.neg::before{color:rgba(240,82,82,.55)}
+.di.pos::before{color:rgba(74,222,128,.55)}
+
+/* ── METHODOLOGY ───────────────────────────────────────────── */
+.method{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden}
+.method-btn{
+  width:100%;padding:13px 18px;display:flex;align-items:center;
+  justify-content:space-between;cursor:pointer;background:none;border:none;
+  color:var(--t2);font-size:12px;font-weight:500;font-family:inherit;
+}
+.method-body{display:none;padding:18px;border-top:1px solid var(--b1);font-size:12px;line-height:1.8;color:var(--t2)}
+.method-body.open{display:block}
+.method-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;margin-top:14px}
+.mi{background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);padding:11px}
+.mi-t{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--indigo);margin-bottom:5px}
+.mi-b{font-size:11.5px;color:var(--t2)}
+
+/* ── LIVE EXPLAINER BANNER ─────────────────────────────────── */
+.explainer{
+  background:rgba(129,140,248,.05);border:1px solid rgba(129,140,248,.15);
+  border-radius:var(--r);padding:18px 20px;margin-bottom:28px;
+  font-size:12px;color:var(--t2);line-height:1.75;
+}
+.explainer h3{font-size:13px;font-weight:600;color:var(--t1);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.explainer code{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--indigo);
+}
+.explainer ul{padding-left:18px;margin-top:6px}
+.explainer li{margin-bottom:4px}
+.explainer .tier{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.explainer .t-block{background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);padding:10px;font-size:11px}
+.explainer .t-block strong{display:block;color:var(--t1);margin-bottom:4px;font-size:12px}
+
+/* ── RESPONSIVE ────────────────────────────────────────────── */
+@media(max-width:860px){
+  .hero{grid-template-columns:1fr}
+  .charts{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .page-hdr{grid-template-columns:1fr}
+  .day-badge{display:none}
+  .tl-main{grid-template-columns:72px 58px 1fr 24px}
+}
+@media(max-width:520px){
+  .wrap{padding:16px 12px 60px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .tl-sum{display:none}
+  .tl.open .tl-detail{grid-template-columns:1fr}
+  .explainer .tier{grid-template-columns:1fr}
+  .topbar-r .ts{display:none}
+  .t-row{grid-template-columns:56px 68px 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ╔═ TOPBAR ═══════════════════════════════════════════════╗ -->
+<div class="topbar">
+  <div class="topbar-l">
+    <span class="brand">Conflict Intelligence</span>
+    <span class="pipe">·</span>
+    <div class="topbar-status">
+      <div class="dot"></div>
+      <span>OPERATION EPIC FURY — DAY 25</span>
+    </div>
+  </div>
+  <div class="topbar-r">
+    <span class="ts" id="tsText">—</span>
+    <button class="btn" onclick="refreshFeed()">↻ Refresh Feed</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ╔═ PAGE HEADER ══════════════════════════════════════════╗ -->
+  <div class="page-hdr">
+    <div>
+      <div class="page-title">Iran–US War<br><em>Intelligence Dashboard</em></div>
+      <div class="page-sub">Feb 28 — Mar 24, 2026 · Dual tracker: Abu Dhabi strike probability + Conflict intensity</div>
+    </div>
+    <div class="day-badge">
+      <div class="day-num">D+24</div>
+      <div class="day-lbl">Today · Mar 24</div>
+    </div>
+  </div>
+
+  <!-- ╔═ HERO METRICS ═════════════════════════════════════════╗ -->
+  <div class="hero">
+    <div class="hero-card a">
+      <div class="hc-lbl">Abu Dhabi Attack Probability — Today</div>
+      <div class="hc-val a">42%</div>
+      <div class="hc-sub">7 BMs + 16 UAVs intercepted overnight. Diplomacy driving risk lower. 5-day pause still in effect.</div>
+      <div class="hc-badge dn">↓ −55pp from peak 97% on Feb 28</div>
+    </div>
+    <div class="hero-card w">
+      <div class="hc-lbl">Iran–US War Intensity Score — Today</div>
+      <div class="hc-val w">25<span style="font-size:26px;font-weight:400;color:var(--t3)">/100</span></div>
+      <div class="hc-sub">Vance + Witkoff + Kushner heading to Islamabad. Closest to formal talks since war began Feb 28.</div>
+      <div class="hc-badge dn">↓ −70pts from peak 95 on Feb 28</div>
+    </div>
+  </div>
+
+  <!-- ╔═ STAT STRIP ═══════════════════════════════════════════╗ -->
+  <div class="stats">
+    <div class="stat"><div class="stat-n">War Start</div><div class="stat-v c-red">Feb 28</div></div>
+    <div class="stat"><div class="stat-n">Days Active</div><div class="stat-v c-or">25</div></div>
+    <div class="stat"><div class="stat-n">UAE BMs Intercepted</div><div class="stat-v c-red">352+</div></div>
+    <div class="stat"><div class="stat-n">UAE UAVs Intercepted</div><div class="stat-v c-or">1,789+</div></div>
+    <div class="stat"><div class="stat-n">UAE Casualties</div><div class="stat-v c-yl">8 KIA · 157+</div></div>
+    <div class="stat"><div class="stat-n">Brent Crude</div><div class="stat-v c-gr">~$99</div></div>
+  </div>
+
+  <!-- ╔═ TODAY TERMINAL ════════════════════════════════════════╗ -->
+  <div style="margin-bottom:32px">
+    <div class="sh">
+      <div class="sh-t"><div class="dot"></div> Today — March 24, 2026 <span class="badge live">Live Feed</span></div>
+      <div class="sh-m">All times AST (UTC+4) · newest first</div>
+    </div>
+    <div class="terminal">
+      <div class="terminal-hdr">
+        <div class="terminal-hdr-l">
+          <span>📡</span>
+          <span>Mar 24 — Real-Time Event Log</span>
+        </div>
+        <div class="terminal-ts" id="liveClock">—</div>
+      </div>
+      <div id="todayFeed"></div>
+    </div>
+  </div>
+
+  <!-- ╔═ CHARTS ═══════════════════════════════════════════════╗ -->
+  <div style="margin-bottom:32px">
+    <div class="sh">
+      <div class="sh-t">Trend Curves</div>
+      <div class="sh-m">Feb 25 — Mar 24, 2026</div>
+    </div>
+    <div class="charts">
+      <div class="chart-card">
+        <div class="chart-hdr">
+          <div class="chart-ttl">Abu Dhabi Attack Probability (%)</div>
+          <div class="chart-meta">42% today · peak 97%</div>
+        </div>
+        <div class="chart-body"><svg class="ch" id="chartAbu" viewBox="0 0 580 160" preserveAspectRatio="none"></svg></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-hdr">
+          <div class="chart-ttl">Iran–US War Intensity Score (1–100)</div>
+          <div class="chart-meta">25 today · peak 95</div>
+        </div>
+        <div class="chart-body"><svg class="ch" id="chartWar" viewBox="0 0 580 160" preserveAspectRatio="none"></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ╔═ LIVE NEWS FEED ════════════════════════════════════════╗ -->
+  <div style="margin-bottom:32px">
+    <div class="sh">
+      <div class="sh-t"><div class="dot"></div> Live News Feed <span class="badge live">Auto-refresh 5min</span></div>
+      <div class="sh-m" id="feedTs">via GDELT Global News API</div>
+    </div>
+    <div class="feed-wrap">
+      <div class="feed-hdr">
+        <div class="sh-t" style="font-size:11px">Recent Headlines · Iran · UAE · Middle East</div>
+        <button class="btn" onclick="refreshFeed()">↻ Refresh</button>
+      </div>
+      <div id="newsFeed"><div class="feed-loading"><div class="spinner"></div>Fetching live headlines from GDELT...</div></div>
+    </div>
+  </div>
+
+  <!-- ╔═ LIVE DATA EXPLAINER ═══════════════════════════════════╗ -->
+  <div class="explainer" style="margin-bottom:32px">
+    <h3>⚡ How Live Data Works — &amp; How to Upgrade This Dashboard</h3>
+    <p>Right now this is a <strong>static HTML file</strong> — all historical data is hardcoded. The news feed at the top is <strong>already live</strong> and pulls real headlines from the <strong>GDELT Project API</strong> (a free, real-time global news tracker). Here's how the different tiers of "live" work:</p>
+    <div class="tier">
+      <div class="t-block">
+        <strong>🟢 Already Live (This File)</strong>
+        The GDELT news feed fetches real headlines every 5 minutes. No setup needed — just open this file in a browser.
+        Uses: <code>api.gdeltproject.org</code>
+      </div>
+      <div class="t-block">
+        <strong>🟡 Semi-Live (Easy Upgrade)</strong>
+        Host this file on any website (Netlify, GitHub Pages, Vercel — all free). A JavaScript <code>setInterval</code> can auto-refresh the full page on a schedule. Add a <code>config.js</code> file you update manually each day with new scores.
+      </div>
+      <div class="t-block">
+        <strong>🔵 Fully Live (Requires Backend)</strong>
+        Connect to <strong>NewsAPI</strong>, <strong>Bing News API</strong>, or scrape primary sources. Write a small backend (Node.js or Python, free on Railway/Render) that updates a JSON file daily. This dashboard reads from that JSON file automatically.
+      </div>
+    </div>
+    <br>
+    <strong style="color:var(--t1)">The simplest path to fully live data:</strong>
+    <ul>
+      <li>Create a free account at <code>newsapi.org</code> (100 req/day free)</li>
+      <li>Replace the GDELT <code>fetchNews()</code> call with NewsAPI — it has better Middle East coverage</li>
+      <li>To auto-update the probability/score numbers, either update this file manually each day, or connect to a small Google Sheet via its JSON API (free, no backend needed)</li>
+      <li>For the most powerful setup: <strong>Perplexity API</strong> can summarise daily events and output structured JSON directly into this dashboard</li>
+    </ul>
+  </div>
+
+  <!-- ╔═ TIMELINE ═════════════════════════════════════════════╗ -->
+  <div style="margin-bottom:32px">
+    <div class="sh">
+      <div class="sh-t">Day-by-Day Timeline</div>
+      <div class="sh-m">Newest first · click any row to expand</div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('combined',this)">Combined View</button>
+      <button class="tab" onclick="switchTab('abu',this)">Abu Dhabi Tracker</button>
+      <button class="tab" onclick="switchTab('war',this)">Iran–US War</button>
+    </div>
+    <div class="scale" id="scaleLegend">
+      <span class="scale-lbl">Scale:</span>
+      <div class="sc"><div class="sc-dot" style="background:var(--red)"></div><span>Critical / Full War</span></div>
+      <div class="sc"><div class="sc-dot" style="background:var(--orange)"></div><span>High / Very High</span></div>
+      <div class="sc"><div class="sc-dot" style="background:var(--yellow)"></div><span>Medium / Lowering</span></div>
+      <div class="sc"><div class="sc-dot" style="background:var(--green)"></div><span>Low / De-escalated</span></div>
+      <div class="sc"><div class="sc-dot" style="background:var(--teal)"></div><span>Ceasefire Zone</span></div>
+    </div>
+    <div class="timeline" id="tl"></div>
+  </div>
+
+  <!-- ╔═ METHODOLOGY ══════════════════════════════════════════╗ -->
+  <div class="method">
+    <button class="method-btn" onclick="toggleMethod(this)">
+      <span>Scoring Methodology &amp; Factor Weights</span>
+      <span>▾</span>
+    </button>
+    <div class="method-body">
+      <strong style="color:var(--t1)">Abu Dhabi Attack Probability</strong> — The daily percentage is the estimated probability that Abu Dhabi (including Al Dhafra Air Base, Zayed International Airport, Ruwais, Habshan, ADNOC infrastructure, and civilian areas) would experience at least one confirmed kinetic strike on that day — whether intercepted debris or a direct hit. It does not measure severity, only occurrence likelihood.<br><br>
+      <strong style="color:var(--t1)">Iran–US War Intensity Score</strong> — Represents conflict intensity on a 1–100 scale, calibrated by active strike intensity, diplomatic openings vs. closures, leadership statements, proxy front activity, economic pressure indicators, and third-party mediation status. 100 = full war, no peace path. 1 = imminent ceasefire.
+      <div class="method-grid">
+        <div class="mi"><div class="mi-t">Factor 1 — War Phase</div><div class="mi-b">Sets the base rate; escalation/plateau/wind-down phase multiplier applied first</div></div>
+        <div class="mi"><div class="mi-t">Factor 2 — Strike Targeting</div><div class="mi-b">IRGC operational statements explicitly naming targets. Al Dhafra = maximum uplift</div></div>
+        <div class="mi"><div class="mi-t">Factor 3 — Intercept Rate vs. Debris</div><div class="mi-b">Even 90%+ intercepts cause debris casualties. Score includes debris-strike probability</div></div>
+        <div class="mi"><div class="mi-t">Factor 4 — Diplomatic Signals</div><div class="mi-b">Pezeshkian apology, Islamabad talks, Trump pause all reduce daily probability</div></div>
+        <div class="mi"><div class="mi-t">Factor 5 — Missile Depletion</div><div class="mi-b">Iranian stockpile degradation lowers per-day fire volume and probability</div></div>
+        <div class="mi"><div class="mi-t">Factor 6 — Economic Pressure</div><div class="mi-b">Oil above $110 = IRGC targeting energy. Below $100 = de-escalation pressure</div></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   DATA — ABU DHABI (newest first)
+═══════════════════════════════════════════════════════════════ */
+const ABU = [
+  { d:"Mar 24", iso:"2026-03-24", day:"D+24", v:42, tier:"medium", out:"partial",
+    hl:"Diplomacy driving risk lower — 7 BMs + 16 UAVs intercepted overnight",
+    sum:"7 BMs + 16 UAVs intercepted overnight. Cumulative since Feb 28: 352 BM + 15 cruise + 1,789 UAVs. Vance/Witkoff/Kushner to Islamabad. 5-day power plant pause Day 2. Attack rate ~8% of opening volume.",
+    up:["IRGC still firing — no ceasefire declared","Al Dhafra still operational with US forces","Any Islamabad talks breakdown → instant 80%+ probability return","352 total ballistic missiles fired at UAE — accumulated capability non-trivial"],
+    dn:["Vance + Witkoff + Kushner to Islamabad — closest to formal Iran–US talks yet","5-day power plant pause in effect","Attack rate at ~8% of war-opening volume (92% drop from peak)","Trump and Iran both using 'end of war' language","Oil below $100 — global pressure for resolution building","UAE total: 8 killed, 157 injured from 1,789+ UAVs — intercepts working"] },
+  { d:"Mar 23", iso:"2026-03-23", day:"D+23", v:48, tier:"medium", out:"partial",
+    hl:"Trump announces 5-day pause — probability drops below 50% for first time",
+    sum:"Trump's 5-day pause on power plant strikes. Oil crashes 11% to $99.94. UAE engages 3 BMs + 8 UAVs — lowest single-day count since war began. No confirmed Abu Dhabi civilian impact.",
+    up:["No formal ceasefire — IRGC can resume without authorisation","Al Dhafra still hosts US forces — still Iran's stated justification","Iran publicly denying all talks"],
+    dn:["FIRST DAY BELOW 50% THRESHOLD since war began","Trump 5-day pause = US military tempo slowing = less IRGC retaliation logic","3 BMs + 8 UAVs — lowest daily count, down 96% from Day 1","Oil crashes to $99.94 — financial de-escalation signal","Islamabad talks framework being arranged"] },
+  { d:"Mar 22", iso:"2026-03-22", day:"D+22", v:55, tier:"high", out:"partial",
+    hl:"Trump Hormuz ultimatum spikes probability — 4 BMs + 25 UAVs intercepted",
+    sum:"UAE Defence confirms 4 BMs + 25 UAVs intercepted. Trump threatens bombing Iranian power plants. Iran threatens to close Hormuz 'completely and indefinitely'. No confirmed ground-level Abu Dhabi impact.",
+    up:["Trump power plant threat = Iran could surge retaliation hitting UAE","Iran still firing — 4 BMs + 25 UAVs","Hormuz standoff = UAE frontline state still primary target","Oil at $112"],
+    dn:["Attack rate at ~15% of opening-day volume (down 85%)","UAE air defences intercepted all 4 BMs","UAE not retaliating — not escalating","Iran missile stockpile visibly depleted"] },
+  { d:"Mar 21", iso:"2026-03-21", day:"D+21", v:60, tier:"high", out:"partial",
+    hl:"War week 4: UAE attacks down 80%+ from peak — but not zero",
+    sum:"Iran's overall attack rate down 90% from opening. UAE still receiving occasional drones. Al Dhafra US forces remain. No confirmed Abu Dhabi civilian impact.",
+    up:["Al Dhafra remains stated IRGC target","No ceasefire = technically still in conflict zone","Any escalation trigger could restart full barrage"],
+    dn:["Iran attacks 90% below peak by US count","Trump 'winding down' language public","Pezeshkian's peace terms signal: wants resolution"] },
+  { d:"Mar 20", iso:"2026-03-20", day:"D+20", v:63, tier:"high", out:"partial",
+    hl:"Trump considers 'winding down'; IRGC rate much lower",
+    sum:"Trump Truth Social post on winding down. UAE reports only minor overnight intercept activity. No confirmed Abu Dhabi ground-level impact today.",
+    up:["IRGC says 'war continues until US bases evacuated'","Al Dhafra still active — declared target","Iran not in ceasefire talks"],
+    dn:["Trump wind-down language = IRGC under pressure","UAE attack volume much lower","Iran's missile reserves clearly depleted"] },
+  { d:"Mar 19", iso:"2026-03-19", day:"D+19", v:68, tier:"high", out:"partial",
+    hl:"US: Iran's Hormuz capability 'degraded'; Gulf attack rate declining",
+    sum:"US CENTCOM: Iran's Hormuz threat degraded. Iran cluster munitions hitting West Bank. UAE daily attacks at roughly 10–15% of opening-day volume.",
+    up:["Iran still firing — war not over","IRGC vows 'maximum pressure' continues","Habshan gas area still under watch"],
+    dn:["Iran Gulf attacks down ~80–85% from peak","US military says Iranian capability degraded","Congress pressuring Trump on exit — political winds shifting"] },
+  { d:"Mar 18", iso:"2026-03-18", day:"D+18", v:72, tier:"high", out:"partial",
+    hl:"Iran rate declining; Trump lifts oil sanctions",
+    sum:"Trump lifts sanctions on 140M barrels Iranian oil. UAE reports decreased missile activity. Some debris incidents but no major Abu Dhabi strike.",
+    up:["War still active","Al Dhafra US forces still present","IRGC: 'strikes continue until complete evacuation of bases'"],
+    dn:["Trump's sanctions lift = tacit US acknowledgment of war cost","Iran overall missile rate 60%+ below peak","UAE less prominent in IRGC daily briefings"] },
+  { d:"Mar 17", iso:"2026-03-17", day:"D+17", v:80, tier:"high", out:"hit",
+    hl:"South Pars strike triggers energy retaliation — Ruwais drone again",
+    sum:"Israel strikes South Pars gas field (world's largest, shared with Qatar). Iran retaliates against UAE energy. Habshan and Bab fields hit. Oil tanker struck off Fujairah. Brent $112.",
+    up:["South Pars retaliation = UAE energy sites certain targets","Iran naval officer warns Gulf oil facility workers to evacuate","Habshan+Bab fields shut again"],
+    dn:["UAE missile rate declining — Iran's Gulf firepower portion falling","Qatar angry at Israel over South Pars = coalition fracture helps UAE"] },
+  { d:"Mar 16", iso:"2026-03-16", day:"D+16", v:83, tier:"critical", out:"hit",
+    hl:"Palestinian woman killed in Al Bahyah, Abu Dhabi",
+    sum:"Palestinian national killed in Al Bahyah district, Abu Dhabi, after missile strikes civilian car. Emirates Boeing 777 landing as smoke rises near Dubai airport. 45 arrested in Abu Dhabi for filming.",
+    up:["Direct Abu Dhabi civilian fatality confirmed","Dubai airport smoke visible internationally — maximum reputational damage","Iran announces new waves in response to US strikes"],
+    dn:["UAE tightening information control — 45 arrested in Abu Dhabi alone","Attack rate still declining from peak vs. early war"] },
+  { d:"Mar 15", iso:"2026-03-15", day:"D+15", v:85, tier:"critical", out:"hit",
+    hl:"Al Dhafra satellite damage confirmed; GlobalEye AEW&C aircraft destroyed",
+    sum:"Airbus Pléiades Neo satellite images confirm Al Dhafra hangar damage. UAE GlobalEye aircraft (most expensive Emirati military asset) destroyed. IRGC 57th phase names Al Dhafra explicitly.",
+    up:["Satellite-confirmed Al Dhafra destruction — major escalation","UAE's most expensive military aircraft destroyed","IRGC names Al Dhafra as specific reprisal target","High-explosive cruise missiles used against Al Dhafra"],
+    dn:["UAE's remaining assets now dispersed/evacuated","US patriots from South Korea being redeployed to UAE"] },
+  { d:"Mar 14", iso:"2026-03-14", day:"D+14", v:82, tier:"critical", out:"hit",
+    hl:"IRGC 50th wave declared — UAE still primary Gulf target",
+    sum:"IRGC announces its 50th wave of operations. UAE still receiving daily drone and missile fire. Saudi Arabia intercepting 32+ drones daily.",
+    up:["IRGC celebrating 50 waves — institutional commitment to continued attacks","UAE most targeted Gulf state — no sign of reprieve","Al Dhafra named in IRGC targeting list again"],
+    dn:["Volume much lower than early war","Trump hinting at 'wind down' — changing political calculus"] },
+  { d:"Mar 13", iso:"2026-03-13", day:"D+13", v:82, tier:"critical", out:"hit",
+    hl:"IRGC overrides president — resumes attacks; Habshan shut again",
+    sum:"Despite Pezeshkian's apology, IRGC resumes attacks on UAE energy. Habshan and Bab field shut again after overnight attacks.",
+    up:["IRGC operationally independent of president — apology overruled","Habshan + Bab oil fields shut = Abu Dhabi energy targeted","Arab League condemns attacks — but Iran doesn't care"],
+    dn:["Diplomatic pressure building on IRGC","Total Iranian firepower clearly declining — smaller volleys"] },
+  { d:"Mar 12", iso:"2026-03-12", day:"D+12", v:78, tier:"high", out:"partial",
+    hl:"Pezeshkian apologises — promises to stop hitting Gulf neighbours",
+    sum:"Iran's president apologises to Gulf states and says Iran will stop targeting neighbours. UAE defences report 'significantly decreased' attacks. First genuine reprieve signal.",
+    up:["IRGC ignores Pezeshkian — 'if they deny US access' is unfulfillable condition","Iran judiciary chief same day issues new threat","Al Dhafra still hosts US forces — still valid under Iran's logic"],
+    dn:["Pezeshkian apology = first diplomatic signal targeting UAE","UAE attack rate 'significantly decreased' this day","Gulf states showing anger at Iran — coalition splinter risk"] },
+  { d:"Mar 11", iso:"2026-03-11", day:"D+11", v:85, tier:"critical", out:"hit",
+    hl:"268 BMs, 1,514 drones intercepted — official UAE tally",
+    sum:"UAE MoD official tally: 268 BM, 15 cruise, 1,514 UAVs. Fires in residential Abu Dhabi. Amazon data centre disruption. ~24 BMs + 137 drones per day at UAE.",
+    up:["Rate per day: ~24 BMs + 137 drones at UAE","Iran shows no sign of sparing UAE civilian targets","ADNOC Ruwais still shut — crippling energy output"],
+    dn:["UAE intercept rate highest of any target country","Iran missile depletion becoming a real constraint"] },
+  { d:"Mar 10", iso:"2026-03-10", day:"D+10", v:86, tier:"critical", out:"hit",
+    hl:"1,700+ missiles/drones at UAE; designated most-hit Gulf state",
+    sum:"CNBC analysis confirms UAE has received more fire than any Gulf state. Al Dhafra satellite damage images published. Multiple residential debris falls in Abu Dhabi.",
+    up:["UAE = single most targeted Gulf nation","Iran dedicates 60% of Gulf firepower to UAE","Al Dhafra damage confirmed in satellite imagery"],
+    dn:["UAE economy adapting — business continuity","Trump beginning to show signs of 'fatigue' publicly"] },
+  { d:"Mar 9", iso:"2026-03-09", day:"D+9", v:88, tier:"critical", out:"hit",
+    hl:"Habshan gas field targeted; debris kills civilian",
+    sum:"Abu Dhabi's Habshan gas facility under attack. Palestinian woman killed in Al Bahyah district after missile debris hits civilian car. Total UAE: 8 killed, 157+ injured.",
+    up:["Direct Abu Dhabi civilian death confirmed","Habshan = critical gas infrastructure — explicitly targeted","Iran using heavier warhead missiles as stockpile depletes"],
+    dn:["Rubio says Iran has 'fewer missiles every day'","Very high intercept effectiveness continues"] },
+  { d:"Mar 8", iso:"2026-03-08", day:"D+8", v:89, tier:"critical", out:"hit",
+    hl:"New supreme leader elected — Gulf targeting continues",
+    sum:"Mojtaba Khamenei elected. IRGC vows to 'continue operations'. Abu Dhabi reports overnight intercept debris. UAE total strikes cross 1,500.",
+    up:["New hardline IRGC posture post-leadership transition","UAE total already exceeds 1,500 missiles+drones","Iran 60% of firepower targeting Gulf US bases"],
+    dn:["New leadership = potential future pivot to diplomacy","Iran missile rate declining slightly day over day"] },
+  { d:"Mar 7", iso:"2026-03-07", day:"D+7", v:90, tier:"critical", out:"hit",
+    hl:"Al Dhafra targeted directly — IRGC drone combat centre claim",
+    sum:"IRGC claims Al Dhafra drone combat centre struck. Camp de la Paix (French naval base) struck again. UAE president visits hospital.",
+    up:["Al Dhafra named directly in IRGC communiqué","French and US bases both targeted","Iranian judiciary chief warns of 'heavy attacks'"],
+    dn:["UAE claim: intercepting 90%+ of incoming","Pezeshkian makes first apology to Gulf neighbours (IRGC ignores it)"] },
+  { d:"Mar 6", iso:"2026-03-06", day:"D+6", v:90, tier:"critical", out:"hit",
+    hl:"Strike rate near-constant; expats continue fleeing",
+    sum:"UAE posts daily intercept announcements. Multiple overnight ballistic missile attempts. 21 people arrested in Dubai for filming attacks. Pets abandoned city-wide.",
+    up:["Social media censorship = regime knows attacks are damaging its reputation","No sign of Iran pausing Gulf campaign","1,000+ total drones+missiles at UAE already"],
+    dn:["Iran's missile rate beginning slight decline vs. Day 1 peak","UAE's air defence adapting to drone swarm tactics"] },
+  { d:"Mar 5", iso:"2026-03-05", day:"D+5", v:91, tier:"critical", out:"hit",
+    hl:"Emirati helicopter lost; Port of Fujairah hit",
+    sum:"Two Emirati servicemen killed when helicopter crashes during intercept operations. Port of Fujairah oil operations suspended after drone strike and debris falls.",
+    up:["Iran still at maximum effort — no letup","Fujairah = key oil export point, active target","IRGC explicitly names UAE energy sites as targets"],
+    dn:["UAE total fatalities still in single digits — intercepts working","Global pressure on Iran re: civilian targets building"] },
+  { d:"Mar 4", iso:"2026-03-04", day:"D+4", v:92, tier:"critical", out:"hit",
+    hl:"Daily barrage continues — towers, airport, debris zone",
+    sum:"Dubai Creek Harbour tower hit by drone debris. DIFC Innovation Hub facade damaged. UAE airspace briefly closed. Multiple intercept booms over Abu Dhabi Corniche.",
+    up:["Iran rate unchanged — still multiple daily waves","No diplomatic signal from Iran yet","UAE high-value civilian infrastructure drawing targeting"],
+    dn:["UAE president publicly vows 'we are no easy prey'","Australia sends Wedgetail EWACS to strengthen air picture"] },
+  { d:"Mar 3", iso:"2026-03-03", day:"D+3", v:93, tier:"critical", out:"hit",
+    hl:"US consulate Dubai struck; Ruwais refinery fire",
+    sum:"Iranian drone starts fire at US consulate in Dubai. Ruwais refinery (world's 4th largest, Abu Dhabi) hit causing fire. ADNOC shuts 922,000 bpd capacity.",
+    up:["Iran explicitly expands targeting beyond military to energy","Ruwais = Abu Dhabi's economic heart targeted","Expats fleeing — private jets $250,000+ to leave UAE"],
+    dn:["No direct civilian mass casualty strike so far","Intercept systems holding on most ballistic missiles"] },
+  { d:"Mar 2", iso:"2026-03-02", day:"D+2", v:94, tier:"critical", out:"hit",
+    hl:"Al Dhafra targeted again; 174 missiles tracked in 2 days",
+    sum:"UAE Defence: 174 BMs tracked (161 intercepted), 689 drones (645 intercepted), 8 cruise missiles struck. Education shifts to remote. France deploys Rafales.",
+    up:["UAE confirmed as most attacked Gulf state","IRGC says Al Dhafra is a 'priority' target","Debris and partial hits continuing regardless of high intercept rate"],
+    dn:["France deploys Rafale jets from Al Dhafra to intercept","90%+ intercept rate limiting actual damage"] },
+  { d:"Mar 1", iso:"2026-03-01", day:"D+1", v:95, tier:"critical", out:"hit",
+    hl:"Sustained barrage — Palm Jumeirah fire, airport hit",
+    sum:"Drone strikes Palm Jumeirah (Fairmont hotel area). Dubai Int'l Airport briefly evacuated. Jebel Ali Port fire. Abu Dhabi debris injuries. AWS data centre struck.",
+    up:["IRGC maintains maximum pressure — no slow-down","Iran fires 60% of all missiles at Gulf US bases","UAE = Iran's most heavily targeted Gulf state"],
+    dn:["UK begins 'defensive air sorties' over UAE — adds intercept layer"] },
+  { d:"Feb 28", iso:"2026-02-28", day:"D+0", v:97, tier:"critical", out:"hit",
+    hl:"War begins — Al Dhafra hit within hours",
+    sum:"Multiple ballistic missiles and drones strike Al Dhafra Air Base. Debris kills one Pakistani national near Zayed Airport. French naval base Camp de la Paix also hit.",
+    up:["War begins — Iran committed to full retaliation","Al Dhafra hosts 3,500 US troops — #1 target in UAE","Iran strikes ALL Gulf US bases simultaneously","137 missiles + 209 drones fired at UAE on Day 1"],
+    dn:["UAE's dense Patriot/THAAD grid provides some protection"] },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA — WAR SCORE (newest first)
+═══════════════════════════════════════════════════════════════ */
+const WAR = [
+  { d:"Mar 24", iso:"2026-03-24", day:"D+24", v:25, tier:"medium",
+    hl:"Witkoff + Vance heading to Islamabad — Iran still denying but talks progressing",
+    sum:"Witkoff, Kushner, Vance expected in Islamabad to meet Iranian officials. Iran publicly denies all talks to save face domestically. UAE reports 7 BMs + 16 UAVs intercepted overnight. Oil stabilising below $100.",
+    neg:["Iran officially denies all talks — public denial creates domestic political trap","IRGC still firing — 7 BMs + 16 UAVs at UAE overnight","No formal ceasefire framework agreed","Netanyahu push to continue Lebanon/Hezbollah operations complicates deal","Hormuz remains partly blocked — tankers still cautious"],
+    pos:["Vance + Witkoff + Kushner travelling to Islamabad for Iran talks","5-day power plant pause still in effect — no escalation","Oil below $100 — financial markets pricing in de-escalation","Iran attack rate at ~5–10% of opening-day volume","Multiple mediators active (Egypt, Pakistan, Turkey)","Both sides using 'end of war' language even while denying talks"] },
+  { d:"Mar 23", iso:"2026-03-23", day:"D+23", v:30, tier:"medium",
+    hl:"DIPLOMATIC BREAKTHROUGH: Trump announces 5-day pause — 'productive talks' with Iran",
+    sum:"Trump posts: 'Very good and productive conversations regarding a complete and total resolution of hostilities.' Orders 5-day pause on power plant strikes. Brent crashes 11% to $99.94.",
+    neg:["Iran FM officially denies any talks: 'There is no dialogue between Tehran and Washington'","Iran Parliament Speaker Ghalibaf: 'No negotiations have been held'","Iran still firing missiles during the 'pause' — no ceasefire declared","IRGC can resume attacks regardless of political track"],
+    pos:["TRUMP'S 5-DAY PAUSE — biggest de-escalation signal of the war","Witkoff + Kushner directly engaged with Iranian counterparts","Oil crashes from $112 → $99.94 (-11%) — market reading this as real","Egypt, Pakistan, Turkey all actively mediating","Brent below $100 for first time since war began"] },
+  { d:"Mar 22", iso:"2026-03-22", day:"D+22", v:38, tier:"medium",
+    hl:"Trump gives Iran 48-hour Hormuz ultimatum — threatens to bomb power plants",
+    sum:"Trump ultimatum: Iran has 48 hours to reopen Strait of Hormuz or US will strike power plants. Iran fires its 70th wave of attacks. Iran threatens to close Hormuz 'completely and indefinitely' if power plants struck.",
+    neg:["Trump's power plant threat — catastrophic escalation risk if executed","Iran threatens to completely seal Hormuz if power plants hit","Iran fires 70th wave against US bases and Israel","Brent crude at $112/barrel","No diplomatic channel formally open"],
+    pos:["Iran missile rate still 90% below opening-day peak","Egypt, Pakistan, Turkey quietly exploring back-channel roles","US Congress applying pressure — rare political check","Gulf states signalling exhaustion with being caught in crossfire"] },
+  { d:"Mar 21", iso:"2026-03-21", day:"D+21", v:38, tier:"medium",
+    hl:"War enters week 4 with no end — but Iran attacks down 90%",
+    sum:"Iran's drone/missile rate down 90% from war's opening. Trump hints at wind-down but still no ceasefire. Energy crisis putting pressure on both sides.",
+    neg:["No ceasefire talks on table — both sides reject the term","Iran: war will end only with reparations + guarantees","Lebanon war deepening — 1,001 killed in Lebanon","Hormuz still effectively blocked — $112 crude"],
+    pos:["Iran attacks down 90% from peak — military exhaustion clear","Trump 'winding down' language now public","Oil sanctions lifted — economic off-ramp being cleared","Congress demanding exit strategy","European diplomacy active: UK, Germany, France all engaged"] },
+  { d:"Mar 20", iso:"2026-03-20", day:"D+20", v:42, tier:"high",
+    hl:"Trump on Truth Social: 'winding down Military efforts'",
+    sum:"Trump posts considering 'winding down'. Says 'I think we've won.' Iran says it doesn't believe him. Oil at $112.",
+    neg:["Trump rejects ceasefire: 'You don't do a ceasefire when you're obliterating'","Thousands more US troops heading to region (contradicts wind-down)","Iran fires near-continuous missiles at Israel","Hezbollah drones hitting Israel from Lebanon simultaneously"],
+    pos:["Trump public statement on 'winding down' — first formal signal","Trump says Iran 'finished' militarily","US Amb Waltz: war must end, diplomacy still open","Congress challenging Trump on exit plan"] },
+  { d:"Mar 19", iso:"2026-03-19", day:"D+19", v:48, tier:"high",
+    hl:"US CENTCOM: Iran's Hormuz capability 'degraded'; Brent hits $115",
+    sum:"US military says Iran's ability to threaten Hormuz is degraded. Israel strikes Caspian Sea fleet. Iranian cluster munitions killing civilians in West Bank.",
+    neg:["Brent crude hits $115/barrel — highest point of war","Israel strikes Caspian Sea Iranian naval targets","Iranian cluster munitions killing civilians","US admin 'running out of options' on energy crisis"],
+    pos:["US CENTCOM: Iran's Hormuz threat capability 'degraded'","Iran missile/drone attacks down 90% from early war","Oil sanctions lifted — US tacitly acknowledging war cost is too high","Congress publicly asking Trump for 'exit plan'"] },
+  { d:"Mar 18", iso:"2026-03-18", day:"D+18", v:55, tier:"high",
+    hl:"Trump: US could end war 'right now'; Iran: we don't believe him",
+    sum:"Trump says US could end war immediately. Senior Iranian source tells CNN Iran doesn't believe him. Trump lifts sanctions on 140M barrels of Iranian oil.",
+    neg:["F-35 fighter jet hit by Iranian fire — first successful strike on US stealth aircraft","Iran: 'almost non-stop missiles towards all districts' of Israel","Hezbollah firing precision missiles at Palmachim Airbase","Trump calls NATO allies 'cowards'"],
+    pos:["Trump signals considering 'winding down' military efforts","US lifts sanctions on 140M barrels Iranian oil — economic de-escalation signal","Goldman Sachs/Dallas Fed warning of US economic pain — political pressure building"] },
+  { d:"Mar 17", iso:"2026-03-17", day:"D+17", v:60, tier:"very-high",
+    hl:"South Pars gas field struck — energy crisis becomes global",
+    sum:"Israel strikes Iran's South Pars gas field (world's largest reserves, shared with Qatar). Qatar furious. Iran retaliates against Gulf energy. Brent $112+.",
+    neg:["South Pars gas field struck — catastrophic escalation, Qatar furious","Iran strikes UAE, Saudi, Bahrain energy in retaliation","Brent crude $112/barrel","Iran naval officer warns all oil facility workers to evacuate Gulf"],
+    pos:["Qatar's anger at Israel = wedge forming in US coalition","Arab states becoming increasingly reluctant partners","Trump tries to distance US from South Pars strike"] },
+  { d:"Mar 16", iso:"2026-03-16", day:"D+16", v:65, tier:"very-high",
+    hl:"Araghchi press conference: 'We didn't start this, US must be accountable'",
+    sum:"Iran FM holds press conference — Iran not seeking ceasefire, war must end on Iran's terms. Trump: 'We don't know who we're dealing with anymore' (all leaders dead).",
+    neg:["Iran explicitly rejects ceasefire","IRGC threatens Netanyahu assassination","Israel destroys aircraft at Mehrabad Airport","UK formally warns Iran against targeting British bases"],
+    pos:["Germany pursuing diplomatic back-channel to Tehran","Macron warns of chaos — European pressure building on US","Iran football boycott of 2026 World Cup (regime domestic pressure)"] },
+  { d:"Mar 15", iso:"2026-03-15", day:"D+15", v:68, tier:"very-high",
+    hl:"Trump: Iran 'decimated' but war not over; Iran FM: no ceasefire",
+    sum:"Trump says Iran has been decimated. Iran FM Araghchi says no ceasefire. Russia sharing modified Shaheds with Iran.",
+    neg:["Iran FM formally rejects ceasefire talks","Russia providing upgraded drones with self-defence to Iran","IRGC claims Sejjil ballistic missile fired at Israel","Heavy strikes in Isfahan, Shiraz, Hamadan, Tehran"],
+    pos:["Trump claiming near-total destruction of Iranian military capability","Iran attacks down significantly from peak","Iran FM says 'war must end' — signals exhaustion"] },
+  { d:"Mar 14", iso:"2026-03-14", day:"D+14", v:71, tier:"very-high",
+    hl:"Iran fires 50th wave of operations; war fully entrenched at 2 weeks",
+    sum:"IRGC announces its '50th wave of operations'. US has struck 7,000+ Iranian targets total.",
+    neg:["IRGC 50th wave — attrition war settling in","US has struck 7,000+ targets in Iran","Bahrain and Kuwait reporting multiple daily intercepts","Saudi Arabia intercepting 32+ drones daily"],
+    pos:["UAE Iranian attacks 'significantly decreased' vs. opening days","Saudi intercepting almost all Iranian missiles","US privately considering 'wind down' scenario (not yet public)"] },
+  { d:"Mar 13", iso:"2026-03-13", day:"D+13", v:73, tier:"very-high",
+    hl:"US refuelling aircraft crashes — 6 crew killed; IAEA warns of nuclear site risks",
+    sum:"US CENTCOM confirms all 6 crew killed when refuelling aircraft crashes in western Iraq. IAEA chief Grossi repeatedly warns of nuclear facility strike dangers.",
+    neg:["6 US crew killed in aircraft crash (13 total military fatalities)","IAEA warns of radiation risk from nuclear site strikes","Strikes now confirmed in 26 of 31 Iranian provinces","Israel carries out 200-target strike wave in western Iran"],
+    pos:["Grossi's warnings creating international pressure on US/Israel","NATO allies declining to join Hormuz coalition"] },
+  { d:"Mar 12", iso:"2026-03-12", day:"D+12", v:75, tier:"very-high",
+    hl:"Pezeshkian sets terms for ending war — first concrete peace signal",
+    sum:"Iranian President lays out peace terms: recognition of Iran's rights, reparations, international guarantees against future attack.",
+    neg:["Iran charges the US with full responsibility for the war","Araghchi: Hormuz will remain blocked","Hezbollah ground ops — 1M Lebanese displaced","Oil prices past $100/barrel"],
+    pos:["Pezeshkian publicly sets peace terms — first concrete off-ramp offer","Iran's political leadership diverging from IRGC hardline","Iran stopping strikes on Gulf neighbours per president's promise","Macron calls Pezeshkian — European diplomatic engagement strengthening"] },
+  { d:"Mar 11", iso:"2026-03-11", day:"D+11", v:78, tier:"very-high",
+    hl:"Al Jazeera analysis: 'decapitation strikes removed all diplomatic off-ramps'",
+    sum:"Al Jazeera, CSIS analysts note: assassinating Khamenei made peace harder. Conflict enters phase 2.",
+    neg:["War phase 2 — systematic targeting of IRGC HQ and Basij","Conflict spreading to 9 countries total","Brent crude approaching $100/barrel","No off-ramps visible per CSIS analyst"],
+    pos:["Iran's missile + drone capability substantially degraded","Pezeshkian signals openness to talks","Iran has NOT closed Hormuz fully — ships still attempting passage"] },
+  { d:"Mar 10", iso:"2026-03-10", day:"D+10", v:79, tier:"very-high",
+    hl:"Iranian women's football team defects in Australia",
+    sum:"Iran's women soccer squad refuses to sing national anthem. Trump offers asylum. Bahrain civilian killed by Iranian strike debris.",
+    neg:["Iranian drones hit Bahrain Airport — fuel tanks on fire","Bahrain civilian (29) killed","Hezbollah firing precision missiles at central Israel","6 French soldiers wounded in Erbil drone strike"],
+    pos:["Iranian athletes defecting = regime legitimacy crisis inside Iran","Pezeshkian apologises to neighbouring states","Iran promising to stop hitting neighbours if they deny US access"] },
+  { d:"Mar 9", iso:"2026-03-09", day:"D+9", v:80, tier:"war",
+    hl:"Rubio: Iran has fewer missiles, launchers every day",
+    sum:"Sec. State Rubio says Iran's missile stockpile declining daily. Russia reportedly sharing intelligence with Iran.",
+    neg:["Russia-Iran intelligence sharing confirmed by Ukraine","Iran using Russian-modified Shaheds against US bases","13 US service members killed total so far","IRGC vows to pursue and kill Netanyahu"],
+    pos:["Rubio's statement hints at attritional endgame","US privately acknowledging high war costs ($3.7bn in first 100 hours)"] },
+  { d:"Mar 8", iso:"2026-03-08", day:"D+8", v:82, tier:"war",
+    hl:"Mojtaba Khamenei elected new Supreme Leader; war institutionalised",
+    sum:"Mojtaba Khamenei elected new Supreme Leader. All Iranian factions pledge allegiance. Trump calls him 'lightweight'.",
+    neg:["New Supreme Leader = regime has not collapsed","All Iranian factions unite behind Mojtaba Khamenei","Trump threatens new leader — escalatory","Isfahan missile complex targeted again"],
+    pos:["New civilian structure = potential future negotiating partner","Iran missile rate down 50%+ from opening days"] },
+  { d:"Mar 7", iso:"2026-03-07", day:"D+7", v:85, tier:"war",
+    hl:"Natanz damaged; nuclear scientists targeted; no new supreme leader yet",
+    sum:"Satellite images confirm damage at Natanz and Isfahan missile complex. Iran's nuclear programme reportedly obliterated per DNI Gabbard.",
+    neg:["Natanz nuclear facility hit — IAEA raises alarm","Isfahan missile complex tunnel entrances destroyed","Iran strikes Kuwait airport and Ali al Salem airbase","IRGC says equipped for intense long war"],
+    pos:["DNI Gabbard: Iran nuclear programme 'obliterated'","IAEA: no evidence of organised weapons programme","Lebanon-Israel talks reportedly being explored"] },
+  { d:"Mar 5", iso:"2026-03-05", day:"D+5", v:88, tier:"war",
+    hl:"Houthi leader signals readiness but holds fire",
+    sum:"Houthi leader says 'hands on trigger' but group issues only rhetorical solidarity. US has 700 aircraft in region.",
+    neg:["Houthi leader threatens intervention","700 US aircraft in region — largest since Iraq 2003","14 Arleigh Burke destroyers deployed","Iran IRGC says prepared for long war"],
+    pos:["Houthis NOT entering the war (major positive)","Houthi restraint influenced by wanting to protect Yemeni peace process","Iran missile rate down vs. Day 1"] },
+  { d:"Mar 4", iso:"2026-03-04", day:"D+4", v:89, tier:"war",
+    hl:"Iran fires 500+ ballistic missiles total; rate declining",
+    sum:"Iran has now fired 500+ ballistic and 2,000 drones since Feb 28. Rate declining — analysts split on whether this is depletion or rationing.",
+    neg:["500+ ballistic missiles confirmed fired","Almost 2,000 drones deployed","60% of launches targeting US Gulf bases","Energy crisis deepening — tankers avoiding Hormuz"],
+    pos:["Missile launch rate declining day over day","Houthis still holding back","France's Macron calling Pezeshkian for diplomacy"] },
+  { d:"Mar 3", iso:"2026-03-03", day:"D+3", v:91, tier:"war",
+    hl:"Iran parliament hit; Assembly of Experts bombed mid-session",
+    sum:"Iran state broadcaster (IRIB) hit. Parliament reportedly targeted. Israel bombs 84-member Assembly of Experts as they convene to pick new supreme leader.",
+    neg:["State broadcaster HQ struck","Parliament building targeted by airstrikes","Assembly of Experts bombed mid-session","Iran fires Sejjil ballistic missiles at Israel","Trump declares 'everything knocked out'"],
+    pos:["Iran missile rate declining from peak","No NATO countries joining US coalition"] },
+  { d:"Mar 2", iso:"2026-03-02", day:"D+2", v:92, tier:"war",
+    hl:"IRGC HQ flattened; Hezbollah escalates into Lebanon war",
+    sum:"IRGC Malek-Ashtar building destroyed. Hezbollah launches missiles into Israel from Lebanon. Israel strikes south Beirut.",
+    neg:["IRGC Malek-Ashtar complex destroyed (video confirmed)","Hezbollah launches missiles + drones at Israel","Israel escalates into south Beirut","500+ BMs + 2,000 drones fired by Iran total","Kuwait warplanes crash"],
+    pos:["Houthis show restraint — only rhetoric, no military action","No ground invasion announced yet"] },
+  { d:"Mar 1", iso:"2026-03-01", day:"D+1", v:93, tier:"war",
+    hl:"Iran retaliates widely — UAE civilians killed, proxy fronts open",
+    sum:"Iran strikes US bases in Bahrain, Qatar, Kuwait, Jordan. 3 civilians killed in UAE. Hezbollah activates. Iran interim leadership council convenes.",
+    neg:["Iranian strikes hit US 5th Fleet HQ in Bahrain","UAE civilians killed by Iranian drones","Hezbollah attacks Israel","UK base in Cyprus struck by drone"],
+    pos:["Iran interim council = possible moderate path","Iran president apologises to neighbours"] },
+  { d:"Feb 28", iso:"2026-02-28", day:"D+0", v:95, tier:"war",
+    hl:"Operation Epic Fury begins — Khamenei assassinated",
+    sum:"US-Israel launch ~900 strikes in 12 hours. Supreme Leader Khamenei killed. Iran launches 170+ ballistic missiles at Israel and US bases.",
+    neg:["Khamenei assassinated in first strike","~40 Iranian officials killed","Girls' school hit — 170 civilian deaths in Minab","Iran launches 170 BMs at Israel + US bases","Strait of Hormuz activity begins"],
+    pos:["UK/EU call for diplomacy immediately","UK declines to participate militarily"] },
+  { d:"Feb 27", iso:"2026-02-27", day:"D-1", v:35, tier:"medium",
+    hl:"Last-minute: embassies evacuated, US declares Iran wrongful detainer",
+    sum:"US State Dept evacuates embassies from Iran. War machinery in final position.",
+    neg:["Embassies evacuated from Tehran — signal of imminent action","US State Dept designation poisons diplomacy","Aircraft carriers in final position"],
+    pos:["Oman still trying to mediate","Some diplomats still in contact"] },
+  { d:"Feb 25", iso:"2026-02-25", day:"D-3", v:15, tier:"lowering",
+    hl:"Deal seemed 'within reach' — then collapsed",
+    sum:"Iran FM Araghchi calls nuclear deal 'historic' and 'within reach'. Oman FM says breakthrough achieved. Talks expected Mar 2.",
+    neg:["US military buildup at record levels since 2003 invasion","Trump 'not thrilled' with talks, MBS lobbying for strike","Iran rejected full dismantlement demand"],
+    pos:["Iran agreed to never stockpile enriched uranium","Iran agreed to full IAEA verification","Oman FM says 'peace within reach'"] },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   TODAY EVENTS (Mar 24 — newest first)
+═══════════════════════════════════════════════════════════════ */
+const TODAY = [
+  { t:"15:00", tag:"intel",
+    hl:"Both sides using 'end of war' language while publicly denying formal talks",
+    det:"Iranian and US officials continue to deny negotiations while simultaneously signalling de-escalation — consistent with face-saving back-channel diplomacy before a public announcement." },
+  { t:"13:30", tag:"intel",
+    hl:"War Intensity Score updated: 25/100 — lowest since conflict began Feb 28",
+    det:"Daily assessment: war score at 25/100, down from peak of 95. Attack rate at ~5–10% of opening-day volume. Closest point to formal diplomatic resolution since conflict started." },
+  { t:"12:00", tag:"diplo",
+    hl:"Ghalibaf (Iran Parliament Speaker) confirmed as Iranian interlocutor for Islamabad",
+    det:"Parliamentary legitimacy involved — not just IRGC track. Ghalibaf's involvement suggests Iran is building a negotiating framework with domestic political cover for any eventual deal." },
+  { t:"11:15", tag:"mil",
+    hl:"UAE MoD confirms cumulative: 352 BMs + 15 cruise missiles + 1,789 UAVs intercepted since Feb 28",
+    det:"Total intercepts now confirmed. Despite 1,789+ UAV launches: 8 killed, 157 injured — among the highest intercept effectiveness rates recorded in modern conflict." },
+  { t:"10:00", tag:"mil",
+    hl:"5-day pause on US power plant strikes: Day 2 confirmed — no new escalation",
+    det:"Pentagon confirms the 5-day pause on strikes against Iranian power infrastructure remains in effect. No new escalatory actions by either side in the last 24 hours." },
+  { t:"09:30", tag:"breaking",
+    hl:"CONFIRMED: JD Vance, Steve Witkoff, Jared Kushner en route to Islamabad",
+    det:"The White House confirms all three senior US envoys are travelling to Islamabad, Pakistan. This is the most senior direct US engagement toward Iranian officials since war began Feb 28. Egypt, Pakistan, and Turkey all serving as go-betweens." },
+  { t:"08:45", tag:"intel",
+    hl:"Abu Dhabi attack probability revised to 42% — first sustained reading below 50%",
+    det:"Driven by Trump pause + lowest daily intercept count (7 BMs + 16 UAVs) since D+0. Moderate-high zone rather than critical for the first time." },
+  { t:"08:00", tag:"diplo",
+    hl:"Iran Foreign Ministry officially denies all negotiations with Washington",
+    det:"'There is no dialogue between Tehran and Washington.' IRGC-aligned officials maintain denial to preserve domestic political space for any eventual deal. Back-channel activity confirmed to continue via intermediaries." },
+  { t:"06:00", tag:"econ",
+    hl:"Brent crude stabilises at ~$99/barrel in Asian markets — below $100 floor",
+    det:"Oil below $100 for second consecutive day. Goldman Sachs revises conflict premium estimate downward. Markets pricing in ~65% probability of ceasefire within 30 days." },
+  { t:"03:15", tag:"intercept",
+    hl:"UAE air defence engages 16 UAVs (overnight total) — all intercepted",
+    det:"Second wave of overnight UAV intercepts completed. Total overnight: 7 BMs + 16 UAVs. All threats successfully neutralised. Down 96% from opening-day volume." },
+  { t:"01:30", tag:"intercept",
+    hl:"UAE intercepts 7 ballistic missiles — lowest overnight BM count since D+0",
+    det:"Al Dhafra air defence systems engaged 7 incoming ballistic missiles. All confirmed intercepted. No confirmed debris casualties. Consistent with 'noise floor' level — systematic wind-down pattern." },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════════════ */
+function tierToClass(tier){
+  const m={critical:'critical','c-critical':'critical',high:'high','c-high':'high','very-high':'high',
+    medium:'medium','c-medium':'medium',low:'low','c-low':'low',ceasefire:'ceasefire',
+    lowering:'ceasefire',war:'critical'};
+  return m[tier]||'medium';
+}
+function tierColor(tc){
+  const m={critical:'var(--red)',high:'var(--orange)',medium:'var(--yellow)',low:'var(--green)',ceasefire:'var(--teal)'};
+  return m[tc]||'var(--yellow)';
+}
+function scoreClass(v,isScore){
+  if(v>=80)return'sc-red';
+  if(v>=60)return isScore?'sc-or':'sc-or';
+  if(v>=40)return'sc-yl';
+  if(v>=20)return isScore?'sc-yl':'sc-yl';
+  if(v>=10)return'sc-tl';
+  return'sc-gr';
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+/* ═══════════════════════════════════════════════════════════════
+   TODAY TERMINAL
+═══════════════════════════════════════════════════════════════ */
+function buildToday(){
+  const el=document.getElementById('todayFeed');
+  TODAY.forEach(e=>{
+    const row=document.createElement('div');
+    row.className='t-row';
+    row.innerHTML=`
+      <div class="t-time">${e.t}</div>
+      <div class="t-tag-cell"><span class="tag ${e.tag}">${e.tag.toUpperCase()}</span></div>
+      <div class="t-content">
+        <div class="t-hl">${e.hl}</div>
+        <div class="t-detail">${e.det}</div>
+      </div>`;
+    el.appendChild(row);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CHARTS
+═══════════════════════════════════════════════════════════════ */
+function buildChart(id,data,valueKey,lineColor){
+  const svg=document.getElementById(id);
+  const W=580,H=160,pt={t:14,b:24,l:28,r:10};
+  const iw=W-pt.l-pt.r,ih=H-pt.t-pt.b;
+  const arr=[...data].reverse(); // oldest→newest for chart
+  const vals=arr.map(d=>d[valueKey]);
+  const xs=i=>pt.l+(i/(vals.length-1))*iw;
+  const ys=v=>pt.t+(1-v/100)*ih;
+  const gid='g'+id;
+  let h=`<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="${lineColor}" stop-opacity=".2"/>
+    <stop offset="100%" stop-color="${lineColor}" stop-opacity="0"/>
+  </linearGradient></defs>`;
+  // Grid
+  [25,50,75].forEach(v=>{
+    const y=ys(v);
+    h+=`<line x1="${pt.l}" y1="${y}" x2="${W-pt.r}" y2="${y}" stroke="#1a1a1a" stroke-width="1"/>`;
+    h+=`<text x="${pt.l-4}" y="${y+3}" fill="#3a3a3a" font-size="8" text-anchor="end" font-family="JetBrains Mono,monospace">${v}</text>`;
+  });
+  if(valueKey==='v'&&data[0]?.out){ // abu dhabi — 50% line
+    h+=`<line x1="${pt.l}" y1="${ys(50)}" x2="${W-pt.r}" y2="${ys(50)}" stroke="#facc15" stroke-width="1" stroke-dasharray="3,3" opacity=".3"/>`;
+  }
+  // Area
+  const pts=vals.map((v,i)=>`${xs(i)},${ys(v)}`).join(' ');
+  h+=`<polygon points="${pt.l},${pt.t+ih} ${pts} ${W-pt.r},${pt.t+ih}" fill="url(#${gid})"/>`;
+  // Line
+  h+=`<path d="${vals.map((v,i)=>`${i===0?'M':'L'}${xs(i)},${ys(v)}`).join(' ')}" fill="none" stroke="${lineColor}" stroke-width="1.75" stroke-linejoin="round"/>`;
+  // Today marker
+  const li=vals.length-1;
+  h+=`<line x1="${xs(li)}" y1="${pt.t}" x2="${xs(li)}" y2="${pt.t+ih}" stroke="#818cf8" stroke-width="1" stroke-dasharray="3,3" opacity=".5"/>`;
+  h+=`<text x="${xs(li)-3}" y="${pt.t+9}" fill="#818cf8" font-size="8" text-anchor="end" font-family="JetBrains Mono,monospace">TODAY</text>`;
+  // Dots every 4
+  arr.forEach((d,i)=>{
+    if(i%4===0||i===arr.length-1){
+      h+=`<circle cx="${xs(i)}" cy="${ys(d[valueKey])}" r="2.5" fill="${lineColor}" opacity=".8"/>`;
+      h+=`<text x="${xs(i)}" y="${H-5}" fill="#3a3a3a" font-size="8" text-anchor="middle" font-family="JetBrains Mono,monospace">${d.d.replace('2026-','')}</text>`;
+    }
+  });
+  svg.innerHTML=h;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TIMELINE
+═══════════════════════════════════════════════════════════════ */
+let activeTab='combined';
+
+function switchTab(tab,btn){
+  activeTab=tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  buildTimeline(tab);
+}
+
+function buildTimeline(tab){
+  const el=document.getElementById('tl');
+  el.innerHTML='';
+  if(tab==='combined'){
+    // Merge by iso date, newest first
+    const byDate={};
+    ABU.forEach(d=>{if(!byDate[d.iso])byDate[d.iso]={iso:d.iso,d:d.d,day:d.day};byDate[d.iso].abu=d});
+    WAR.forEach(d=>{if(!byDate[d.iso])byDate[d.iso]={iso:d.iso,d:d.d,day:d.day};byDate[d.iso].war=d});
+    Object.values(byDate).sort((a,b)=>b.iso.localeCompare(a.iso)).forEach(item=>renderCombined(el,item));
+  } else if(tab==='abu'){
+    ABU.forEach(d=>renderCard(el,d,'abu'));
+  } else {
+    WAR.forEach(d=>renderCard(el,d,'war'));
+  }
+}
+
+function renderCard(el,d,type){
+  const isToday=d.iso==='2026-03-24';
+  const tc=tierToClass(d.tier);
+  const col=tierColor(tc);
+  const sc=scoreClass(d.v,type==='war');
+  const isAbu=type==='abu';
+
+  const div=document.createElement('div');
+  div.className=`tl tl-${tc}${isToday?' tl-today':''}`;
+
+  const otag=isAbu&&d.out?`<span class="otag ${d.out}">${d.out==='hit'?'STRUCK':d.out==='partial'?'PARTIAL':d.out.toUpperCase()}</span>`:'';
+  const upItems=(isAbu?d.up:d.neg).map(x=>`<div class="di neg">${esc(x)}</div>`).join('');
+  const dnItems=(isAbu?d.dn:d.pos).map(x=>`<div class="di pos">${esc(x)}</div>`).join('');
+  const negLbl=isAbu?'Factors Increasing Probability':'Escalation Factors';
+  const posLbl=isAbu?'Factors Decreasing Probability':'De-escalation Signals';
+  const unit=isAbu?'%':'';
+
+  div.innerHTML=`
+    <div class="tl-main">
+      <div class="tl-date">${d.d}<br><span style="font-size:10px">${d.day}</span>${isToday?'<div class="tl-today-tag">TODAY</div>':''}
+      </div>
+      <div class="tl-scores">
+        <div class="tl-score ${sc}">${d.v}${unit}</div>
+        <div class="tl-bar"><div class="tl-bar-fill" style="width:${d.v}%;background:${col}"></div></div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-hl">${esc(d.hl)} ${otag}</div>
+        <div class="tl-sum">${esc(d.sum)}</div>
+      </div>
+      <div class="tl-arr">+</div>
+    </div>
+    <div class="tl-detail">
+      <div class="dg"><div class="dg-t neg">${negLbl}</div>${upItems}</div>
+      <div class="dg"><div class="dg-t pos">${posLbl}</div>${dnItems}</div>
+    </div>`;
+
+  div.querySelector('.tl-main').addEventListener('click',()=>div.classList.toggle('open'));
+  el.appendChild(div);
+}
+
+function renderCombined(el,item){
+  const isToday=item.iso==='2026-03-24';
+  const abu=item.abu,war=item.war;
+  const refTier=war?tierToClass(war.tier):abu?tierToClass(abu.tier):'medium';
+  const div=document.createElement('div');
+  div.className=`tl tl-${refTier}${isToday?' tl-today':''}`;
+
+  const abuScore=abu?`<div style="display:flex;align-items:baseline;gap:3px">
+    <span style="font-size:11px;color:var(--t3);font-family:'JetBrains Mono',monospace;font-weight:500">ABU</span>
+    <span class="tl-score ${scoreClass(abu.v,false)}" style="font-size:18px">${abu.v}%</span>
+  </div>`:'';
+  const warScore=war?`<div style="display:flex;align-items:baseline;gap:3px">
+    <span style="font-size:11px;color:var(--t3);font-family:'JetBrains Mono',monospace;font-weight:500">WAR</span>
+    <span class="tl-score ${scoreClass(war.v,true)}" style="font-size:18px">${war.v}</span>
+  </div>`:'';
+
+  const mainHl=abu?abu.hl:war?war.hl:'';
+  const mainSum=abu?abu.sum:war?war.sum:'';
+  const otag=abu&&abu.out?`<span class="otag ${abu.out}">${abu.out==='hit'?'STRUCK':abu.out==='partial'?'PARTIAL':abu.out.toUpperCase()}</span>`:'';
+
+  let detail='<div class="tl-detail">';
+  if(abu){
+    detail+=`<div class="dg"><div class="dg-t neg">Abu Dhabi — Risk Factors ↑</div>${abu.up.map(x=>`<div class="di neg">${esc(x)}</div>`).join('')}</div>`;
+    detail+=`<div class="dg"><div class="dg-t pos">Abu Dhabi — Risk Factors ↓</div>${abu.dn.map(x=>`<div class="di pos">${esc(x)}</div>`).join('')}</div>`;
+  }
+  if(war){
+    detail+=`<div class="dg"><div class="dg-t neg">War — Escalation Factors</div>${war.neg.map(x=>`<div class="di neg">${esc(x)}</div>`).join('')}</div>`;
+    detail+=`<div class="dg"><div class="dg-t pos">War — De-escalation Signals</div>${war.pos.map(x=>`<div class="di pos">${esc(x)}</div>`).join('')}</div>`;
+  }
+  detail+='</div>';
+
+  div.innerHTML=`
+    <div class="tl-main">
+      <div class="tl-date">${item.d}<br><span style="font-size:10px">${item.day}</span>${isToday?'<div class="tl-today-tag">TODAY</div>':''}
+      </div>
+      <div class="tl-scores" style="gap:6px">${abuScore}${warScore}</div>
+      <div class="tl-body">
+        <div class="tl-hl">${esc(mainHl)} ${otag}</div>
+        <div class="tl-sum">${esc(mainSum)}</div>
+      </div>
+      <div class="tl-arr">+</div>
+    </div>
+    ${detail}`;
+
+  div.querySelector('.tl-main').addEventListener('click',()=>div.classList.toggle('open'));
+  el.appendChild(div);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIVE GDELT NEWS FEED
+═══════════════════════════════════════════════════════════════ */
+const QUERIES=[
+  'Iran+UAE+missile+Abu+Dhabi',
+  'Iran+US+ceasefire+Islamabad',
+  'Iran+war+Hormuz+oil',
+  'Operation+Epic+Fury+Iran'
+];
+let qIdx=0;
+
+async function fetchNews(){
+  const feed=document.getElementById('newsFeed');
+  const ts=document.getElementById('feedTs');
+  const q=QUERIES[qIdx%QUERIES.length]; qIdx++;
+  const url=`https://api.gdeltproject.org/api/v2/doc/doc?query=${q}&mode=artlist&maxrecords=8&format=json&sort=DateDesc&timespan=7d`;
+  try{
+    const r=await fetch(url,{signal:AbortSignal.timeout(9000)});
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    const j=await r.json();
+    const now=new Date();
+    const timeStr=now.toLocaleTimeString();
+    ts.textContent=`Last updated ${timeStr} via GDELT`;
+    document.getElementById('tsText').textContent=`Updated: ${timeStr}`;
+    if(!j.articles||j.articles.length===0){
+      feed.innerHTML=`<div class="feed-msg">No recent articles found for this query. GDELT may be rate-limiting.<br>Try refreshing in 60s, or click ↻ Refresh to try a different query.</div>`;
+      return;
+    }
+    feed.innerHTML='';
+    j.articles.forEach(a=>{
+      const item=document.createElement('div');
+      item.className='news-item';
+      if(a.url)item.onclick=()=>window.open(a.url,'_blank','noopener');
+      const domain=a.domain||getDomain(a.url||'');
+      const pub=a.seendate?fmtDate(a.seendate):'Recent';
+      item.innerHTML=`
+        <div class="news-title">${esc(a.title||'Untitled article')}</div>
+        <div class="news-meta">
+          <span class="news-src">${esc(domain)}</span>
+          <span>${pub}</span>
+          ${a.url?`<span style="color:var(--indigo)">↗ Open</span>`:''}
+        </div>`;
+      feed.appendChild(item);
+    });
+  } catch(e){
+    const isTimeout=e.name==='TimeoutError';
+    feed.innerHTML=`<div class="feed-msg">
+      ${isTimeout?'Request timed out — GDELT API is slow. Try refreshing in a moment.':
+        `Live feed unavailable: <code style="font-family:'JetBrains Mono',monospace;color:var(--indigo)">${esc(e.message)}</code>`}
+      <br><br>
+      <strong style="color:var(--t1)">Note:</strong> The news feed uses GDELT's free public API.
+      It works best when opened in a browser (not a local file on some systems — try hosting it or using a live server).
+      The historical data above is always available offline.
+    </div>`;
+  }
+}
+
+function getDomain(url){try{return new URL(url).hostname.replace('www.','')}catch{return url}}
+function fmtDate(s){
+  if(s.length<8)return s;
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return`${s.slice(6,8)} ${months[parseInt(s.slice(4,6))-1]} ${s.slice(0,4)} ${s.slice(9,11)}:${s.slice(11,13)} UTC`;
+}
+
+function refreshFeed(){
+  document.getElementById('newsFeed').innerHTML='<div class="feed-loading"><div class="spinner"></div>Fetching headlines...</div>';
+  fetchNews();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CLOCK
+═══════════════════════════════════════════════════════════════ */
+function tick(){
+  const now=new Date();
+  // Rough AST = UTC+4
+  const ast=new Date(now.getTime()+(4*3600000));
+  document.getElementById('liveClock').textContent=`AST ${ast.toISOString().slice(11,16)} · ${ast.toISOString().slice(0,10)}`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   METHODOLOGY TOGGLE
+═══════════════════════════════════════════════════════════════ */
+function toggleMethod(btn){
+  const body=document.querySelector('.method-body');
+  const arr=btn.querySelector('span:last-child');
+  body.classList.toggle('open');
+  arr.textContent=body.classList.contains('open')?'▴':'▾';
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════════ */
+buildToday();
+buildChart('chartAbu', ABU, 'v', '#facc15');
+buildChart('chartWar', WAR, 'v', '#f05252');
+buildTimeline('combined');
+fetchNews();
+tick();
+setInterval(tick, 30000);
+setInterval(fetchNews, 5*60*1000);
+
+const now=new Date();
+document.getElementById('tsText').textContent=`Updated: ${now.toLocaleTimeString()}`;
+</script>
+</body>
+</html>
