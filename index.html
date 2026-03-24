@@ -375,6 +375,75 @@ svg.ch{width:100%;height:160px;display:block}
 .art-ttl{font-size:12px;color:var(--t2);flex:1;line-height:1.4}
 .art-src{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--indigo);flex-shrink:0}
 
+/* ── MODERN OVERRIDES ──────────────────────────────────────── */
+body::after{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 15% 0%,rgba(129,140,248,.035) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 40% at 85% 100%,rgba(240,82,82,.025) 0%,transparent 55%);
+  pointer-events:none;z-index:0;
+}
+.wrap{position:relative;z-index:1}
+
+/* Cleaner section header replacing .sh */
+.sec{margin-bottom:36px}
+.sec-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;padding-bottom:12px;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.sec-title{font-size:12px;font-weight:600;color:var(--t1);display:flex;align-items:center;gap:8px;letter-spacing:.01em}
+.sec-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);display:flex;align-items:center;gap:8px}
+
+/* Hero cards with gradient tint */
+.hero-card{border-radius:10px}
+.hero-card.a{background:linear-gradient(140deg,var(--s1) 55%,rgba(250,204,21,.05) 100%)}
+.hero-card.w{background:linear-gradient(140deg,var(--s1) 55%,rgba(74,222,128,.05) 100%)}
+.hc-val{font-size:54px;font-weight:800;letter-spacing:-.05em;line-height:1}
+
+/* Stats — subtle left accent */
+.stats{border-radius:10px;gap:1px}
+.stat:nth-child(1){border-left:2px solid rgba(240,82,82,.5)}
+.stat:nth-child(2){border-left:2px solid rgba(251,146,60,.5)}
+.stat:nth-child(3){border-left:2px solid rgba(240,82,82,.35)}
+.stat:nth-child(4){border-left:2px solid rgba(251,146,60,.35)}
+.stat:nth-child(5){border-left:2px solid rgba(250,204,21,.4)}
+.stat:nth-child(6){border-left:2px solid rgba(74,222,128,.4)}
+
+/* Charts */
+.chart-card{border-radius:10px}
+.chart-hdr{padding:16px 20px 12px}
+
+/* Tabs */
+.tabs{border-radius:10px;background:rgba(255,255,255,.03)}
+.tab{border-radius:7px;font-size:11px;letter-spacing:.01em}
+.tab.active{background:var(--s2)}
+
+/* Timeline cards */
+.tl{border-radius:8px}
+
+/* Terminal header cleaner */
+.terminal{border-radius:10px;overflow:hidden}
+.terminal-hdr{background:rgba(255,255,255,.02);border-bottom:1px solid rgba(255,255,255,.05)}
+
+/* Sentiment terminal */
+.lterm-wrap{border-radius:10px}
+.sent-hdr{background:rgba(255,255,255,.02);border-bottom:1px solid rgba(255,255,255,.05)}
+
+/* Methodology */
+.method{border-radius:10px}
+
+/* Buttons */
+.btn{border-radius:7px;font-weight:500;letter-spacing:.01em}
+
+/* Topbar */
+.topbar{border-bottom:1px solid rgba(255,255,255,.04)}
+.brand{font-size:11px;letter-spacing:.1em;font-weight:700;color:var(--t1)}
+
+/* Today terminal: live items get a pulse-in */
+.t-row.live-new{animation:rowIn .4s ease;border-left:2px solid rgba(129,140,248,.4)}
+@keyframes rowIn{from{opacity:0;background:rgba(129,140,248,.05)}to{opacity:1;background:transparent}}
+
 /* ── RESPONSIVE ────────────────────────────────────────────── */
 @media(max-width:860px){
   .hero{grid-template-columns:1fr}
@@ -400,16 +469,17 @@ svg.ch{width:100%;height:160px;display:block}
 <!-- ╔═ TOPBAR ═══════════════════════════════════════════════╗ -->
 <div class="topbar">
   <div class="topbar-l">
-    <span class="brand">Conflict Intelligence</span>
+    <span class="brand">CONFLICT INTELLIGENCE</span>
     <span class="pipe">·</span>
     <div class="topbar-status">
       <div class="dot"></div>
-      <span>OPERATION EPIC FURY — DAY 25</span>
+      <span>OPERATION EPIC FURY — D+24</span>
     </div>
   </div>
   <div class="topbar-r">
-    <span class="ts" id="tsText">—</span>
-    <button class="btn" onclick="refreshFeed()">↻ Refresh Feed</button>
+    <span class="ts" id="liveClock">—</span>
+    <span class="ts" id="tsText" style="margin-left:6px"></span>
+    <button class="btn" onclick="refreshFeed()">↻ Refresh</button>
   </div>
 </div>
 
@@ -453,29 +523,11 @@ svg.ch{width:100%;height:160px;display:block}
     <div class="stat"><div class="stat-n">Brent Crude</div><div class="stat-v c-gr">~$99</div></div>
   </div>
 
-  <!-- ╔═ TODAY TERMINAL ════════════════════════════════════════╗ -->
-  <div style="margin-bottom:32px">
-    <div class="sh">
-      <div class="sh-t"><div class="dot"></div> Today — March 24, 2026 <span class="badge live">Live Feed</span></div>
-      <div class="sh-m">All times AST (UTC+4) · newest first</div>
-    </div>
-    <div class="terminal">
-      <div class="terminal-hdr">
-        <div class="terminal-hdr-l">
-          <span>📡</span>
-          <span>Mar 24 — Real-Time Event Log</span>
-        </div>
-        <div class="terminal-ts" id="liveClock">—</div>
-      </div>
-      <div id="todayFeed"></div>
-    </div>
-  </div>
-
   <!-- ╔═ CHARTS ═══════════════════════════════════════════════╗ -->
-  <div style="margin-bottom:32px">
-    <div class="sh">
-      <div class="sh-t">Trend Curves</div>
-      <div class="sh-m">Feb 25 — Mar 24, 2026</div>
+  <div class="sec">
+    <div class="sec-hdr">
+      <span class="sec-title">Trend Curves</span>
+      <span class="sec-meta">Feb 25 — Mar 24, 2026</span>
     </div>
     <div class="charts">
       <div class="chart-card">
@@ -487,7 +539,7 @@ svg.ch{width:100%;height:160px;display:block}
       </div>
       <div class="chart-card">
         <div class="chart-hdr">
-          <div class="chart-ttl">Iran–US War Intensity Score (1–100)</div>
+          <div class="chart-ttl">Iran–US War Intensity (1–100)</div>
           <div class="chart-meta">25 today · peak 95</div>
         </div>
         <div class="chart-body"><svg class="ch" id="chartWar" viewBox="0 0 580 160" preserveAspectRatio="none"></svg></div>
@@ -496,14 +548,12 @@ svg.ch{width:100%;height:160px;display:block}
   </div>
 
   <!-- ╔═ LIVE SENTIMENT TERMINAL ═══════════════════════════════╗ -->
-  <div style="margin-bottom:32px">
-    <div class="sh">
-      <div class="sh-t"><div class="dot"></div> Live Intel Terminal <span class="badge live">Sentiment Analysis</span></div>
-      <div class="sh-m" id="feedTs">Streaming via GDELT · auto-refresh 5min</div>
+  <div class="sec">
+    <div class="sec-hdr">
+      <span class="sec-title"><div class="dot"></div> Live Intel Terminal</span>
+      <span class="sec-meta"><span class="badge live">Sentiment Analysis</span><span id="feedTs">· GDELT stream · auto-refresh 2min</span></span>
     </div>
     <div class="lterm-wrap">
-
-      <!-- Sentiment Meter -->
       <div class="sent-hdr">
         <div class="sent-label-group">
           <span class="sent-label">Sentiment</span>
@@ -521,19 +571,13 @@ svg.ch{width:100%;height:160px;display:block}
           <span class="sc-pos" id="scPos">0 de-escalation</span>
         </div>
       </div>
-
-      <!-- Terminal body — headlines stream in here -->
       <div class="lterm-body" id="liveTerminal">
         <div class="lterm-init" id="ltermInit">
           <div><span class="cursor-blink"></span> Connecting to GDELT news stream...</div>
-          <div style="font-size:10px;margin-top:4px;color:var(--t3)">Headlines will stream in after fetch completes</div>
+          <div style="font-size:10px;margin-top:4px;color:var(--t3)">Headlines stream in every 1.5 seconds after fetch</div>
         </div>
       </div>
-
-      <!-- Article list (compact, below terminal) -->
       <div class="lterm-art-list" id="artList"></div>
-
-      <!-- Status bar -->
       <div class="lterm-statusbar">
         <span><span class="sdot idle" id="termDot"></span><span id="termStatus">INITIALIZING</span></span>
         <span id="termCount">0 headlines</span>
@@ -542,11 +586,28 @@ svg.ch{width:100%;height:160px;display:block}
     </div>
   </div>
 
+  <!-- ╔═ TODAY LIVE FEED ════════════════════════════════════════╗ -->
+  <div class="sec">
+    <div class="sec-hdr">
+      <span class="sec-title"><div class="dot"></div> Today — March 24, 2026</span>
+      <span class="sec-meta">All times AST (UTC+4) · newest first <span class="badge live" style="margin-left:4px">Live</span></span>
+    </div>
+    <div class="terminal">
+      <div class="terminal-hdr">
+        <div class="terminal-hdr-l">
+          <span>Event Log — Mar 24</span>
+        </div>
+        <div class="terminal-ts" id="todayClockDisplay">AST —</div>
+      </div>
+      <div id="todayFeed"></div>
+    </div>
+  </div>
+
   <!-- Hidden div kept for fetchNews compat -->
   <div id="newsFeed" style="display:none"></div>
 
   <!-- ╔═ LIVE DATA EXPLAINER ═══════════════════════════════════╗ -->
-  <div class="explainer" style="margin-bottom:32px">
+  <div class="explainer sec">
     <h3>⚡ How Live Data Works — &amp; How to Upgrade This Dashboard</h3>
     <p>Right now this is a <strong>static HTML file</strong> — all historical data is hardcoded. The news feed at the top is <strong>already live</strong> and pulls real headlines from the <strong>GDELT Project API</strong> (a free, real-time global news tracker). Here's how the different tiers of "live" work:</p>
     <div class="tier">
@@ -575,10 +636,10 @@ svg.ch{width:100%;height:160px;display:block}
   </div>
 
   <!-- ╔═ TIMELINE ═════════════════════════════════════════════╗ -->
-  <div style="margin-bottom:32px">
-    <div class="sh">
-      <div class="sh-t">Day-by-Day Timeline</div>
-      <div class="sh-m">Newest first · click any row to expand</div>
+  <div class="sec">
+    <div class="sec-hdr">
+      <span class="sec-title">Day-by-Day Timeline</span>
+      <span class="sec-meta">Newest first · click any row to expand</span>
     </div>
     <div class="tabs">
       <button class="tab active" onclick="switchTab('combined',this)">Combined View</button>
@@ -1211,6 +1272,25 @@ function addTermLine(headline,score,source,url){
   if(all.length>80)all[all.length-1].remove();
 }
 
+function addLiveToTodayFeed(article,domain){
+  const feed=document.getElementById('todayFeed');
+  if(!feed)return;
+  const ast=new Date(new Date().getTime()+(4*3600000));
+  const ts=ast.toISOString().slice(11,16);
+  const row=document.createElement('div');
+  row.className='t-row live-new';
+  row.innerHTML=`
+    <div class="t-time">${ts}</div>
+    <div class="t-tag-cell"><span class="tag intel">LIVE</span></div>
+    <div class="t-content">
+      <div class="t-hl">${esc(article.title||'Untitled')}</div>
+      <div class="t-detail">${esc(domain)} · via GDELT</div>
+    </div>`;
+  if(article.url)row.onclick=()=>window.open(article.url,'_blank','noopener');
+  if(article.url)row.style.cursor='pointer';
+  feed.insertBefore(row,feed.firstChild);
+}
+
 function startTerminalStream(articles){
   if(termTicker)clearInterval(termTicker);
   termQueue=[...articles];
@@ -1232,21 +1312,27 @@ function startTerminalStream(articles){
     const score=analyzeSentiment((a.title||'')+(a.seendate||''));
     const domain=a.domain||getDomain(a.url||'');
     addTermLine(a.title||'Untitled',score,domain,a.url||null);
+    // Every 3rd article also surfaces in today feed
+    if(idx%3===0)addLiveToTodayFeed(a,domain);
   };
 
   // First immediately, then every 3s
   tick();
-  termTicker=setInterval(tick,3000);
+  termTicker=setInterval(tick,1500);
 }
 
 /* ═══════════════════════════════════════════════════════════════
    LIVE GDELT NEWS FEED
 ═══════════════════════════════════════════════════════════════ */
 const QUERIES=[
-  'Iran+UAE+missile+Abu+Dhabi',
-  'Iran+US+ceasefire+Islamabad',
-  'Iran+war+Hormuz+oil',
-  'Operation+Epic+Fury+Iran'
+  'Iran+US+war+missile+strike',
+  'Iran+UAE+Abu+Dhabi+attack',
+  'Iran+ceasefire+Islamabad+talks',
+  'Iran+Hormuz+oil+sanctions',
+  'Operation+Epic+Fury+IRGC',
+  'Iran+nuclear+Pezeshkian+diplomacy',
+  'Middle+East+war+2026+ceasefire',
+  'Iran+war+Trump+Witkoff'
 ];
 let qIdx=0;
 
@@ -1320,9 +1406,13 @@ function refreshFeed(){
 ═══════════════════════════════════════════════════════════════ */
 function tick(){
   const now=new Date();
-  // Rough AST = UTC+4
   const ast=new Date(now.getTime()+(4*3600000));
-  document.getElementById('liveClock').textContent=`AST ${ast.toISOString().slice(11,16)} · ${ast.toISOString().slice(0,10)}`;
+  const timeStr=`AST ${ast.toISOString().slice(11,16)}`;
+  const fullStr=`${timeStr} · ${ast.toISOString().slice(0,10)}`;
+  const lc=document.getElementById('liveClock');
+  if(lc)lc.textContent=fullStr;
+  const td=document.getElementById('todayClockDisplay');
+  if(td)td.textContent=timeStr;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1345,7 +1435,7 @@ buildTimeline('combined');
 fetchNews();
 tick();
 setInterval(tick, 30000);
-setInterval(fetchNews, 5*60*1000);
+setInterval(fetchNews, 2*60*1000);
 
 const now=new Date();
 document.getElementById('tsText').textContent=`Updated: ${now.toLocaleTimeString()}`;
