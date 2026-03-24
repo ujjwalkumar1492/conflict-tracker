@@ -1322,31 +1322,42 @@ function startTerminalStream(articles){
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   LIVE NEWS FEED — RSS via rss2json (primary) · GDELT via proxy (fallback)
-   NewsAPI free plan blocks browser requests (HTTP 426) — not usable client-side
+   LIVE NEWS — RSS XML parsed in-browser via allorigins.win proxy
+   Works from both file:// (local) and https:// (Vercel) origins
 ═══════════════════════════════════════════════════════════════ */
 
-// RSS feeds covering Iran/Middle East — fetched via rss2json.com (free, CORS-safe, no key)
+const PROXY='https://api.allorigins.win/get?url=';
+
 const RSS_FEEDS=[
+  {name:'Al Jazeera',         url:'https://www.aljazeera.com/xml/rss/all.xml'},
+  {name:'Reuters World',      url:'https://feeds.reuters.com/reuters/worldNews'},
   {name:'BBC Middle East',    url:'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml'},
-  {name:'Al Jazeera',        url:'https://www.aljazeera.com/xml/rss/all.xml'},
-  {name:'Reuters World',     url:'https://feeds.reuters.com/reuters/worldNews'},
-  {name:'The Guardian World',url:'https://www.theguardian.com/world/rss'},
+  {name:'The Guardian World', url:'https://www.theguardian.com/world/rss'},
+  {name:'Sky News World',     url:'https://feeds.skynews.com/feeds/rss/world.xml'},
 ];
 let rssFeedIdx=0;
 
-// Keywords to keep only relevant articles
-const RELEVANT=['iran','irgc','hormuz','abu dhabi','uae','missile','middle east','trump war','ceasefire','tehran','nuclear deal','islamabad','witkoff','hezbollah','houthi','operation epic fury','gulf','israel','al dhafra','pezeshkian'];
+const RELEVANT=['iran','irgc','hormuz','abu dhabi','uae','missile','middle east','ceasefire','tehran','nuclear','islamabad','witkoff','hezbollah','houthi','gulf war','al dhafra','pezeshkian','operation epic fury','trump war','araghchi'];
 
 function isRelevant(title,desc){
   const t=(title+' '+(desc||'')).toLowerCase();
   return RELEVANT.some(k=>t.includes(k));
 }
 
-function normalizeRSS(item,sourceName){
-  const domain=sourceName||getDomain(item.link||'');
-  const pub=item.pubDate?new Date(item.pubDate).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'Recent';
-  return{title:item.title||'',url:item.link||'',domain,seendate:pub,publishedAt:item.pubDate||''};
+function parseRSSXML(xmlStr,sourceName){
+  const parser=new DOMParser();
+  const xml=parser.parseFromString(xmlStr,'application/xml');
+  const parseErr=xml.querySelector('parsererror');
+  if(parseErr)throw new Error('XML parse error');
+  const items=[...xml.querySelectorAll('item')];
+  if(items.length===0)throw new Error('no items in feed');
+  return items.map(item=>{
+    const g=tag=>item.querySelector(tag)?.textContent?.trim()||'';
+    const link=g('link')||item.querySelector('guid')?.textContent||'';
+    const pub=g('pubDate');
+    const pubFmt=pub?new Date(pub).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'Recent';
+    return{title:g('title'),url:link,domain:sourceName,seendate:pubFmt,publishedAt:pub,desc:g('description')};
+  });
 }
 
 function normalizeGDELT(a){
@@ -1356,7 +1367,7 @@ function normalizeGDELT(a){
 function renderArticleList(articles){
   const artList=document.getElementById('artList');
   artList.innerHTML='';
-  articles.forEach(a=>{
+  articles.slice(0,20).forEach(a=>{
     const item=document.createElement('div');
     item.className='art-item';
     if(a.url)item.onclick=()=>window.open(a.url,'_blank','noopener');
@@ -1378,50 +1389,51 @@ function onArticlesFetched(articles,source){
   renderArticleList(articles);
 }
 
-async function fetchFromRSS(feed){
-  const encoded=encodeURIComponent(feed.url);
-  const url=`https://api.rss2json.com/v1/api.json?rss_url=${encoded}&count=30&order_by=pubDate`;
-  const r=await fetch(url,{signal:AbortSignal.timeout(8000)});
-  if(!r.ok)throw new Error(`rss2json HTTP ${r.status}`);
+async function fetchProxied(targetUrl,timeout=10000){
+  const url=PROXY+encodeURIComponent(targetUrl);
+  const r=await fetch(url,{signal:AbortSignal.timeout(timeout)});
+  if(!r.ok)throw new Error(`proxy ${r.status}`);
   const j=await r.json();
-  if(j.status!=='ok')throw new Error(`rss2json: ${j.message||'error'}`);
-  if(!j.items||j.items.length===0)throw new Error('no RSS items');
-  const relevant=j.items.filter(it=>isRelevant(it.title,it.description));
-  if(relevant.length===0)throw new Error('no relevant items in feed');
-  return relevant.map(it=>normalizeRSS(it,feed.name));
+  if(!j.contents)throw new Error('empty proxy response');
+  return j.contents;
+}
+
+async function fetchFromRSS(feed){
+  const xml=await fetchProxied(feed.url);
+  const items=parseRSSXML(xml,feed.name);
+  const relevant=items.filter(it=>isRelevant(it.title,it.desc));
+  // If nothing matches filter, return all items (feed may cover our topic broadly)
+  const result=relevant.length>0?relevant:items.slice(0,15);
+  if(result.length===0)throw new Error('no articles parsed');
+  return result;
 }
 
 async function fetchFromGDELT(){
-  const queries=['Iran+war+ceasefire+2026','Iran+US+missile+strike+UAE','Iran+Hormuz+Trump+nuclear'];
-  const q=queries[Math.floor(Math.random()*queries.length)];
-  // Use corsproxy.io to bypass CORS on local file:// origins
-  const gdeltUrl=`https://api.gdeltproject.org/api/v2/doc/doc?query=${q}&mode=artlist&maxrecords=12&format=json&sort=DateDesc&timespan=3d`;
-  const proxied=`https://corsproxy.io/?${encodeURIComponent(gdeltUrl)}`;
-  const r=await fetch(proxied,{signal:AbortSignal.timeout(10000)});
-  if(!r.ok)throw new Error(`GDELT HTTP ${r.status}`);
-  const j=await r.json();
-  if(!j.articles||j.articles.length===0)throw new Error('no GDELT articles');
-  return j.articles.map(normalizeGDELT);
+  const q='Iran+war+ceasefire+missile+UAE+2026';
+  const gdeltUrl=`https://api.gdeltproject.org/api/v2/doc/doc?query=${q}&mode=artlist&maxrecords=15&format=json&sort=DateDesc&timespan=3d`;
+  const contents=await fetchProxied(gdeltUrl,12000);
+  const data=JSON.parse(contents);
+  if(!data.articles||data.articles.length===0)throw new Error('no GDELT articles');
+  return data.articles.map(normalizeGDELT);
 }
 
 async function fetchNews(){
   document.getElementById('termDot').classList.remove('idle');
   document.getElementById('termStatus').textContent='FETCHING';
 
-  // Try each RSS feed in rotation, then fall back to GDELT via proxy
   const feed=RSS_FEEDS[rssFeedIdx%RSS_FEEDS.length]; rssFeedIdx++;
   try{
     const articles=await fetchFromRSS(feed);
     onArticlesFetched(articles,feed.name);
-  } catch(e1){
+  }catch(e1){
     try{
       const articles=await fetchFromGDELT();
       onArticlesFetched(articles,'GDELT');
-    } catch(e2){
+    }catch(e2){
       document.getElementById('termDot').classList.add('idle');
       document.getElementById('termStatus').textContent='RETRYING IN 2MIN';
       const init=document.getElementById('ltermInit');
-      if(init)init.innerHTML=`<div style="color:var(--t3)">RSS (${feed.name}): ${esc(e1.message)}<br>GDELT fallback: ${esc(e2.message)}</div><div style="font-size:10px;margin-top:8px;color:var(--t3)">Will retry automatically in 2 minutes.</div>`;
+      if(init)init.innerHTML=`<div style="color:var(--t3);font-family:'JetBrains Mono',monospace;font-size:11px">${esc(feed.name)}: ${esc(e1.message)}<br>GDELT: ${esc(e2.message)}</div><div style="font-size:10px;margin-top:8px;color:var(--t3)">Retrying in 2 minutes — or click ↻ REFRESH</div>`;
     }
   }
 }
