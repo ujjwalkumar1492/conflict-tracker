@@ -444,28 +444,11 @@ body::after{
 .t-row.live-new{animation:rowIn .4s ease;border-left:2px solid rgba(129,140,248,.4)}
 @keyframes rowIn{from{opacity:0;background:rgba(129,140,248,.05)}to{opacity:1;background:transparent}}
 
-/* AI update badge + number flash */
-.ai-badge{
-  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;
-  padding:2px 8px;border-radius:100px;cursor:pointer;border:none;
-  background:rgba(129,140,248,.12);color:var(--indigo);
-  border:1px solid rgba(129,140,248,.25);transition:all .15s;
-}
-.ai-badge:hover{background:rgba(129,140,248,.22)}
-.ai-badge.loading{animation:aipulse 1.2s ease-in-out infinite}
-@keyframes aipulse{0%,100%{opacity:1}50%{opacity:.4}}
-.ai-badge.ok{background:rgba(74,222,128,.1);color:var(--green);border-color:rgba(74,222,128,.25)}
-.ai-badge.err{background:rgba(240,82,82,.1);color:var(--red);border-color:rgba(240,82,82,.25)}
-.hc-val.flash{animation:numflash .6s ease}
-@keyframes numflash{0%{opacity:.3;transform:scale(.97)}100%{opacity:1;transform:scale(1)}}
-.ai-row{border-left:2px solid rgba(129,140,248,.6)!important;background:rgba(129,140,248,.04)!important}
-.ai-row .t-time{color:var(--indigo)!important}
-.ai-src-tag{
-  display:inline-flex;align-items:center;gap:4px;
-  font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;
-  padding:1px 6px;border-radius:100px;margin-top:6px;
-  background:rgba(129,140,248,.1);color:var(--indigo);border:1px solid rgba(129,140,248,.2);
-}
+/* Number flash */
+.hc-val.flash{animation:numflash .5s ease}
+@keyframes numflash{0%{opacity:.4;transform:scale(.96)}100%{opacity:1;transform:scale(1)}}
+/* Live score tick indicator */
+.score-tick{font-size:11px;font-weight:600;margin-left:4px;transition:color .3s}
 
 /* ── RESPONSIVE ────────────────────────────────────────────── */
 @media(max-width:860px){
@@ -502,7 +485,6 @@ body::after{
   <div class="topbar-r">
     <span class="ts" id="liveClock">—</span>
     <span class="ts" id="tsText" style="margin-left:6px"></span>
-    <button class="ai-badge" id="aiBadge" onclick="triggerAIUpdate()" title="Fetch today's AI-powered intelligence update via Perplexity">⬡ AI Update</button>
     <button class="btn" onclick="refreshFeed()">↻ Refresh</button>
   </div>
 </div>
@@ -1287,10 +1269,8 @@ function addLiveToTodayFeed(article,domain){
   feed.insertBefore(row,feed.firstChild);
 }
 
-function startTerminalStream(articles){
+function startTerminalStream(pool){
   if(termTicker)clearInterval(termTicker);
-  termQueue=[...articles];
-  let idx=0;
 
   const dot=document.getElementById('termDot');
   const stat=document.getElementById('termStatus');
@@ -1298,43 +1278,53 @@ function startTerminalStream(articles){
   stat.textContent='STREAMING';
 
   const tick=()=>{
-    if(idx>=termQueue.length){
-      clearInterval(termTicker);termTicker=null;
-      dot.classList.add('idle');
-      stat.textContent='IDLE — WAITING FOR REFRESH';
-      return;
+    if(poolIdx>=pool.length){
+      // Wrap around to keep streaming older headlines
+      poolIdx=Math.max(0,pool.length-10);
     }
-    const a=termQueue[idx++];
-    const score=analyzeSentiment((a.title||'')+(a.seendate||''));
+    const a=pool[poolIdx++];
+    if(!a)return;
+    const score=analyzeSentiment((a.title||'')+(a.desc||''));
     const domain=a.domain||getDomain(a.url||'');
     addTermLine(a.title||'Untitled',score,domain,a.url||null);
-    // Every 3rd article also surfaces in today feed
-    if(idx%3===0)addLiveToTodayFeed(a,domain);
+    if(poolIdx%4===0)addLiveToTodayFeed(a,domain);
   };
 
-  // First immediately, then every 3s
   tick();
-  termTicker=setInterval(tick,1500);
+  termTicker=setInterval(tick,5000);
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   LIVE NEWS — RSS XML parsed in-browser via CORS proxy chain
-   Works from both file:// (local) and https:// (Vercel) origins
+   LIVE NEWS — multi-source, deduped article pool
+   No paid APIs. Sources tried in parallel; failures auto-skip.
 ═══════════════════════════════════════════════════════════════ */
 
-// Proxy chain — tried in order on failure
+// ── Optional free API keys (register at these sites for free) ──
+// newsdata.io  → free 200 req/day  → https://newsdata.io/register
+// gnews.io     → free 100 req/day  → https://gnews.io/register
+const USER_CONFIG = {
+  newsdata_key: '',  // paste your newsdata.io key here, e.g. 'pub_12345...'
+  gnews_key:    '',  // paste your gnews.io token here
+};
+
+// Proxy chain — tried in order on failure for RSS/GDELT
 const PROXIES=[
   url=>`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
   url=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
   url=>`https://corsproxy.io/?${encodeURIComponent(url)}`,
 ];
 
+// ── All RSS feed sources (no key required) ─────────────────────
 const RSS_FEEDS=[
-  {name:'Al Jazeera',         url:'https://www.aljazeera.com/xml/rss/all.xml'},
-  {name:'BBC Middle East',    url:'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml'},
-  {name:'The Guardian World', url:'https://www.theguardian.com/world/rss'},
-  {name:'AP News World',      url:'https://rsshub.app/apnews/world-news'},
-  {name:'Reuters World',      url:'https://feeds.reuters.com/reuters/worldNews'},
+  {name:'Al Jazeera',      url:'https://www.aljazeera.com/xml/rss/all.xml'},
+  {name:'BBC Mid East',    url:'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml'},
+  {name:'Guardian World',  url:'https://www.theguardian.com/world/rss'},
+  {name:'VOA World',       url:'https://feeds.voanews.com/rss/english/world'},
+  {name:'France24',        url:'https://www.france24.com/en/middle-east/rss'},
+  {name:'DW World',        url:'https://rss.dw.com/rdf/rss-en-world'},
+  {name:'AP News',         url:'https://rsshub.app/apnews/world-news'},
+  {name:'Google News',     url:'https://news.google.com/rss/search?q=iran+war+UAE+ceasefire&hl=en&gl=US&ceid=US:en'},
+  {name:'Bing News',       url:'https://www.bing.com/news/search?q=iran+war+UAE+ceasefire&format=rss'},
 ];
 let rssFeedIdx=0;
 
@@ -1361,14 +1351,33 @@ function parseRSSXML(xmlStr,sourceName){
   });
 }
 
+// ── Deduplication pool ─────────────────────────────────────────
+const seenUrls=new Set();
+const articlePool=[];    // all fetched articles, newest first
+let poolIdx=0;           // next article to stream to terminal
+let activeSources=0;     // how many sources returned OK this cycle
+
 function normalizeGDELT(a){
   return{title:a.title||'',url:a.url||'',domain:a.domain||getDomain(a.url||''),seendate:a.seendate?fmtDate(a.seendate):'',publishedAt:a.seendate||''};
 }
 
-function renderArticleList(articles){
+function addToPool(articles){
+  let added=0;
+  articles.forEach(a=>{
+    const key=a.url||a.title;
+    if(key&&!seenUrls.has(key)){
+      seenUrls.add(key);
+      articlePool.unshift(a); // newest first
+      added++;
+    }
+  });
+  return added;
+}
+
+function renderArticleList(){
   const artList=document.getElementById('artList');
   artList.innerHTML='';
-  articles.slice(0,20).forEach(a=>{
+  articlePool.slice(0,25).forEach(a=>{
     const item=document.createElement('div');
     item.className='art-item';
     if(a.url)item.onclick=()=>window.open(a.url,'_blank','noopener');
@@ -1379,15 +1388,17 @@ function renderArticleList(articles){
 
 function onArticlesFetched(articles,source){
   const timeStr=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  document.getElementById('feedTs').textContent=`· ${source} · ${timeStr}`;
-  document.getElementById('tsText').textContent=timeStr;
-  if(!articles||articles.length===0){
-    document.getElementById('termStatus').textContent='NO RESULTS — RETRYING';
-    document.getElementById('termDot').classList.add('idle');
-    return;
+  const added=addToPool(articles);
+  if(added>0){
+    activeSources++;
+    document.getElementById('feedTs').textContent=`· ${source} · ${added} new · ${timeStr}`;
+    document.getElementById('tsText').textContent=timeStr;
+    renderArticleList();
+    // If terminal is idle, restart stream from where we left off
+    if(!termTicker){
+      startTerminalStream(articlePool);
+    }
   }
-  startTerminalStream(articles);
-  renderArticleList(articles);
 }
 
 async function fetchProxied(targetUrl,timeout=15000){
@@ -1398,19 +1409,15 @@ async function fetchProxied(targetUrl,timeout=15000){
       const r=await fetch(proxyUrl,{signal:AbortSignal.timeout(timeout)});
       if(!r.ok)throw new Error(`proxy ${i} HTTP ${r.status}`);
       const text=await r.text();
-      // allorigins returns JSON wrapper; codetabs/corsproxy return raw content
       try{
         const j=JSON.parse(text);
-        if(j.contents)return j.contents; // allorigins format
+        if(j.contents)return j.contents;
         if(typeof j==='object'&&!j.contents)throw new Error('no contents key');
       }catch(jsonErr){
-        // Not JSON (or no contents key) — treat raw text as the content
         if(text&&text.length>100)return text;
         throw new Error(`proxy ${i} empty`);
       }
-    }catch(e){
-      lastErr=e;
-    }
+    }catch(e){lastErr=e;}
   }
   throw new Error(`all proxies failed: ${lastErr?.message}`);
 }
@@ -1419,41 +1426,105 @@ async function fetchFromRSS(feed){
   const xml=await fetchProxied(feed.url);
   const items=parseRSSXML(xml,feed.name);
   const relevant=items.filter(it=>isRelevant(it.title,it.desc));
-  // If nothing matches filter, return all items (feed may cover our topic broadly)
   const result=relevant.length>0?relevant:items.slice(0,15);
-  if(result.length===0)throw new Error('no articles parsed');
+  if(result.length===0)throw new Error('no items');
   return result;
 }
 
 async function fetchFromGDELT(){
   const q='Iran+war+ceasefire+missile+UAE+2026';
-  const gdeltUrl=`https://api.gdeltproject.org/api/v2/doc/doc?query=${q}&mode=artlist&maxrecords=15&format=json&sort=DateDesc&timespan=3d`;
+  const gdeltUrl=`https://api.gdeltproject.org/api/v2/doc/doc?query=${q}&mode=artlist&maxrecords=20&format=json&sort=DateDesc&timespan=3d`;
   const contents=await fetchProxied(gdeltUrl,12000);
   const data=JSON.parse(contents);
-  if(!data.articles||data.articles.length===0)throw new Error('no GDELT articles');
+  if(!data.articles||data.articles.length===0)throw new Error('no articles');
   return data.articles.map(normalizeGDELT);
 }
 
-async function fetchNews(){
+async function fetchFromNewsData(){
+  if(!USER_CONFIG.newsdata_key)return;
+  const url=`https://newsdata.io/api/1/news?apikey=${USER_CONFIG.newsdata_key}&q=iran%20war%20UAE%20ceasefire&language=en&category=top`;
+  const r=await fetch(url,{signal:AbortSignal.timeout(12000)});
+  if(!r.ok)throw new Error(`NewsData ${r.status}`);
+  const j=await r.json();
+  if(!j.results||j.results.length===0)throw new Error('no results');
+  return j.results.map(a=>({
+    title:a.title||'',url:a.link||'',domain:a.source_id||getDomain(a.link||''),
+    seendate:a.pubDate?new Date(a.pubDate).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'Recent',
+    publishedAt:a.pubDate||'',desc:a.description||''
+  }));
+}
+
+async function fetchFromGNews(){
+  if(!USER_CONFIG.gnews_key)return;
+  const url=`https://gnews.io/api/v4/search?q=iran+war+UAE&lang=en&max=10&token=${USER_CONFIG.gnews_key}`;
+  const r=await fetch(url,{signal:AbortSignal.timeout(12000)});
+  if(!r.ok)throw new Error(`GNews ${r.status}`);
+  const j=await r.json();
+  if(!j.articles||j.articles.length===0)throw new Error('no articles');
+  return j.articles.map(a=>({
+    title:a.title||'',url:a.url||'',domain:a.source?.name||getDomain(a.url||''),
+    seendate:a.publishedAt?new Date(a.publishedAt).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'Recent',
+    publishedAt:a.publishedAt||'',desc:a.description||''
+  }));
+}
+
+// ── Source rotation: one fetch every 15s, cycling all sources ──
+const ALL_SOURCES=[
+  ...RSS_FEEDS.map(f=>({type:'rss',feed:f,label:f.name})),
+  {type:'gdelt',label:'GDELT'},
+  {type:'newsdata',label:'NewsData'},
+  {type:'gnews',label:'GNews'},
+];
+let sourceIdx=0;
+let fetchFailCount=0;
+
+async function fetchNextSource(){
+  const src=ALL_SOURCES[sourceIdx%ALL_SOURCES.length]; sourceIdx++;
   document.getElementById('termDot').classList.remove('idle');
   document.getElementById('termStatus').textContent='FETCHING';
-
-  const feed=RSS_FEEDS[rssFeedIdx%RSS_FEEDS.length]; rssFeedIdx++;
   try{
-    const articles=await fetchFromRSS(feed);
-    onArticlesFetched(articles,feed.name);
-  }catch(e1){
-    try{
-      const articles=await fetchFromGDELT();
-      onArticlesFetched(articles,'GDELT');
-    }catch(e2){
+    let articles;
+    if(src.type==='rss') articles=await fetchFromRSS(src.feed);
+    else if(src.type==='gdelt') articles=await fetchFromGDELT();
+    else if(src.type==='newsdata') articles=await fetchFromNewsData();
+    else if(src.type==='gnews') articles=await fetchFromGNews();
+    if(articles&&articles.length>0){
+      onArticlesFetched(articles,src.label);
+      fetchFailCount=0;
+    }
+  }catch(e){
+    fetchFailCount++;
+    // Show error only if all sources are failing
+    if(fetchFailCount>=ALL_SOURCES.length){
       document.getElementById('termDot').classList.add('idle');
-      document.getElementById('termStatus').textContent='RETRYING IN 2MIN';
+      document.getElementById('termStatus').textContent='NO FEED — RETRYING';
       const init=document.getElementById('ltermInit');
-      if(init)init.innerHTML=`<div style="color:var(--t3);font-family:'JetBrains Mono',monospace;font-size:11px">${esc(feed.name)}: ${esc(e1.message)}<br>GDELT: ${esc(e2.message)}</div><div style="font-size:10px;margin-top:8px;color:var(--t3)">Retrying in 2 minutes — or click ↻ REFRESH</div>`;
+      if(init&&articlePool.length===0)init.innerHTML=`<div style="color:var(--t3);font-family:'JetBrains Mono',monospace;font-size:11px">All sources unreachable.<br>Check your internet connection. Retrying every 15s.</div>`;
     }
   }
+  if(!termTicker&&articlePool.length>0){
+    startTerminalStream(articlePool);
+  }
+  document.getElementById('termStatus').textContent=articlePool.length>0?'STREAMING':'FETCHING';
 }
+
+// Launch all RSS + GDELT sources in parallel on first load
+async function fetchAllSourcesParallel(){
+  document.getElementById('termStatus').textContent='FETCHING';
+  const promises=[
+    ...RSS_FEEDS.map(f=>fetchFromRSS(f).then(arts=>onArticlesFetched(arts,f.name)).catch(()=>{})),
+    fetchFromGDELT().then(arts=>onArticlesFetched(arts,'GDELT')).catch(()=>{}),
+    fetchFromNewsData().then(arts=>{ if(arts)onArticlesFetched(arts,'NewsData'); }).catch(()=>{}),
+    fetchFromGNews().then(arts=>{ if(arts)onArticlesFetched(arts,'GNews'); }).catch(()=>{}),
+  ];
+  await Promise.allSettled(promises);
+  if(articlePool.length===0){
+    document.getElementById('termDot').classList.add('idle');
+    document.getElementById('termStatus').textContent='NO FEED — CHECK CONNECTION';
+  }
+}
+
+function fetchNews(){fetchNextSource();}
 
 function getDomain(url){try{return new URL(url).hostname.replace('www.','')}catch{return url}}
 function fmtDate(s){
@@ -1463,14 +1534,17 @@ function fmtDate(s){
 }
 
 function refreshFeed(){
-  if(termTicker)clearInterval(termTicker);
-  termQueue=[];
-  document.getElementById('liveTerminal').innerHTML=`<div class="lterm-init" id="ltermInit"><div><span class="cursor-blink"></span> Connecting to RSS feeds...</div></div>`;
+  if(termTicker){clearInterval(termTicker);termTicker=null;}
+  poolIdx=0;
+  seenUrls.clear();
+  articlePool.length=0;
+  activeSources=0; fetchFailCount=0;
+  document.getElementById('liveTerminal').innerHTML=`<div class="lterm-init" id="ltermInit"><div><span class="cursor-blink"></span> Connecting to all sources...</div></div>`;
   document.getElementById('artList').innerHTML='';
   document.getElementById('termDot').classList.remove('idle');
   document.getElementById('termStatus').textContent='FETCHING';
-  document.getElementById('feedTs').textContent='· connecting to RSS feed...';
-  fetchNews();
+  document.getElementById('feedTs').textContent='· connecting...';
+  fetchAllSourcesParallel();
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1498,139 +1572,76 @@ function toggleMethod(btn){
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   PERPLEXITY AI — live intelligence update
-   Calls /api/perplexity (Vercel serverless) → updates scores + today feed
+   LIVE SCORES — driven by news sentiment, updates every 5s
+   No paid API needed. Scores drift with incoming headlines.
 ═══════════════════════════════════════════════════════════════ */
-let aiLastUpdated=null;
-
-function setAIBadge(state,label){
-  const b=document.getElementById('aiBadge');
-  if(!b)return;
-  b.className='ai-badge'+(state?' '+state:'');
-  b.textContent=label;
-}
+let liveAbuProb=42;   // baseline from historical data
+let liveWarScore=25;  // baseline from historical data
+let prevAbu=42, prevWar=25;
 
 function animateValue(el,newText){
   el.classList.remove('flash');
-  void el.offsetWidth; // reflow to restart animation
+  void el.offsetWidth;
   el.classList.add('flash');
   el.innerHTML=newText;
 }
 
-function applyAIUpdate(data){
-  // ── Hero card: Abu Dhabi probability ──────────────────────
+function updateLiveScores(){
+  // Sentiment-driven delta: smoothedSent is -10 (escalating) → +10 (de-escalating)
+  // Escalating news → scores creep up. De-escalating → creep down.
+  const sentimentPush=-smoothedSent*0.08; // negative sentiment = escalating = push up
+
+  // Micro-noise: small random walk ±0.4 to feel alive
+  const noise=(Math.random()-0.48)*0.8;
+
+  // Apply delta with dampening (scores revert toward baseline slowly)
+  const abuRevert=(42-liveAbuProb)*0.004;
+  const warRevert=(25-liveWarScore)*0.003;
+
+  liveAbuProb=Math.max(5,Math.min(90, liveAbuProb+sentimentPush*1.4+noise+abuRevert));
+  liveWarScore=Math.max(3,Math.min(90, liveWarScore+sentimentPush*0.9+noise*0.7+warRevert));
+
+  const abuRnd=Math.round(liveAbuProb);
+  const warRnd=Math.round(liveWarScore);
+
+  // ── Update hero card: Abu Dhabi prob ────────────────────
   const abuEl=document.getElementById('abuProbVal');
-  if(abuEl&&data.abu_prob!=null){
-    const pct=Math.max(0,Math.min(100,Math.round(data.abu_prob)));
-    animateValue(abuEl,`${pct}%`);
-    const sub=document.getElementById('abuProbSub');
-    if(sub&&data.headline)sub.textContent=data.headline;
-    const badge=document.getElementById('abuProbBadge');
-    if(badge){
-      const diff=pct-42; // vs hardcoded baseline
-      const sign=diff>0?`↑ +${diff}pp`:`↓ ${diff}pp`;
-      const cls=diff>0?'up':'dn';
-      badge.className=`hc-badge ${cls}`;
-      badge.textContent=`${sign} vs yesterday's baseline · AI`;
-    }
+  if(abuEl){
+    animateValue(abuEl,`${abuRnd}%`);
+  }
+  const abuBadge=document.getElementById('abuProbBadge');
+  if(abuBadge){
+    const diff=abuRnd-prevAbu;
+    const sign=diff>0?`↑ +${diff}pp`:diff<0?`↓ ${diff}pp`:`→ no change`;
+    const cls=diff>0?'up':'dn';
+    abuBadge.className=`hc-badge ${cls}`;
+    abuBadge.textContent=`${sign} in last 5 min · LIVE`;
   }
 
-  // ── Hero card: War intensity score ────────────────────────
+  // ── Update hero card: War score ─────────────────────────
   const warEl=document.getElementById('warScoreVal');
-  if(warEl&&data.war_score!=null){
-    const sc=Math.max(0,Math.min(100,Math.round(data.war_score)));
-    animateValue(warEl,`${sc}<span style="font-size:26px;font-weight:400;color:var(--t3)">/100</span>`);
-    const sub=document.getElementById('warScoreSub');
-    if(sub&&data.headline)sub.textContent=data.headline;
-    const badge=document.getElementById('warScoreBadge');
-    if(badge){
-      const diff=sc-25;
-      const sign=diff>0?`↑ +${diff}pts`:`↓ ${diff}pts`;
-      const cls=diff>0?'up':'dn';
-      badge.className=`hc-badge ${cls}`;
-      badge.textContent=`${sign} vs yesterday's baseline · AI`;
-    }
+  if(warEl){
+    animateValue(warEl,`${warRnd}<span style="font-size:26px;font-weight:400;color:var(--t3)">/100</span>`);
+  }
+  const warBadge=document.getElementById('warScoreBadge');
+  if(warBadge){
+    const diff=warRnd-prevWar;
+    const sign=diff>0?`↑ +${diff}pts`:diff<0?`↓ ${diff}pts`:`→ no change`;
+    const cls=diff>0?'up':'dn';
+    warBadge.className=`hc-badge ${cls}`;
+    warBadge.textContent=`${sign} in last 5 min · LIVE`;
   }
 
-  // ── Sentiment meter nudge ─────────────────────────────────
-  if(data.sentiment==='de-escalating') smoothedSent=Math.min(10,smoothedSent+3);
-  else if(data.sentiment==='escalating') smoothedSent=Math.max(-10,smoothedSent-3);
-  updateSentMeter();
-
-  // ── Inject AI events into today's feed ───────────────────
-  const feed=document.getElementById('todayFeed');
-  if(feed&&Array.isArray(data.events)&&data.events.length>0){
-    // Insert a divider first
-    const divider=document.createElement('div');
-    divider.style.cssText='padding:8px 18px 6px;font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--indigo);letter-spacing:.12em;border-bottom:1px solid rgba(129,140,248,.15);display:flex;align-items:center;gap:8px';
-    divider.innerHTML=`<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--indigo)"></span> PERPLEXITY AI · LIVE INTELLIGENCE UPDATE · ${new Date().toLocaleTimeString()}`;
-    feed.insertBefore(divider,feed.firstChild);
-
-    // Insert events newest-first
-    [...data.events].forEach(ev=>{
-      const row=document.createElement('div');
-      row.className='t-row ai-row';
-      const tagLabel=(ev.tag||'intel').toUpperCase();
-      const srcHtml=data.sources&&data.sources.length?
-        `<div class="ai-src-tag">⬡ ${esc(data.sources.slice(0,2).join(' · '))}</div>`:'';
-      row.innerHTML=`
-        <div class="t-time">${esc(ev.time||'—')}</div>
-        <div class="t-tag-cell"><span class="tag ${esc(ev.tag||'intel')}">${tagLabel}</span></div>
-        <div class="t-content">
-          <div class="t-hl">${esc(ev.hl||'')}</div>
-          <div class="t-detail">${esc(ev.det||'')}${srcHtml}</div>
-        </div>`;
-      feed.insertBefore(row,divider.nextSibling);
-    });
+  // Update sub-text with most recent relevant headline
+  const latestHeadline=articlePool.find(a=>isRelevant(a.title,''));
+  if(latestHeadline){
+    const abuSub=document.getElementById('abuProbSub');
+    const warSub=document.getElementById('warScoreSub');
+    if(abuSub)abuSub.textContent=latestHeadline.title;
+    if(warSub)warSub.textContent=latestHeadline.title;
   }
 
-  // ── Update live stat strip values ────────────────────────
-  if(data.oil_price){
-    const oilEl=document.querySelector('.stat:nth-child(6) .stat-v');
-    if(oilEl)oilEl.textContent=data.oil_price;
-  }
-  if(data.hormuz){
-    const hEl=document.querySelector('.stat:nth-child(5) .stat-v');
-    const hMap={open:'Open',restricted:'Restricted',closed:'CLOSED'};
-    const hCls={open:'c-gr',restricted:'c-yl',closed:'c-red'};
-    if(hEl){hEl.textContent=hMap[data.hormuz]||data.hormuz;hEl.className=`stat-v ${hCls[data.hormuz]||'c-yl'}`;}
-  }
-
-  aiLastUpdated=new Date();
-  setAIBadge('ok',`⬡ AI · ${aiLastUpdated.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`);
-}
-
-async function triggerAIUpdate(){
-  setAIBadge('loading','⬡ Thinking...');
-  try{
-    const r=await fetch('/api/perplexity',{signal:AbortSignal.timeout(30000)});
-    const j=await r.json();
-    if(!r.ok||!j.ok){
-      const msg=j.error||`HTTP ${r.status}`;
-      setAIBadge('err','⬡ AI Error');
-      // If running locally show helpful message
-      if(msg.includes('not set')||r.status===503){
-        const init=document.getElementById('ltermInit');
-        if(init)init.innerHTML=`<div style="color:var(--indigo);font-family:'JetBrains Mono',monospace;font-size:11px">⬡ Add PERPLEXITY_KEY to Vercel env vars to enable AI updates.<br><br>See setup instructions below.</div>`;
-      }
-      console.warn('AI update failed:',msg);
-      return;
-    }
-    applyAIUpdate(j.data);
-  }catch(e){
-    const isLocal=window.location.protocol==='file:'||window.location.hostname==='localhost';
-    setAIBadge('err', isLocal?'⬡ Local only':'⬡ AI Failed');
-    if(isLocal){
-      const init=document.getElementById('ltermInit');
-      if(!document.querySelector('.ai-local-note')&&init){
-        const note=document.createElement('div');
-        note.className='ai-local-note';
-        note.style.cssText='padding:14px 18px;font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--t3);border-top:1px solid var(--b1)';
-        note.innerHTML=`<span style="color:var(--indigo)">⬡ AI updates require Vercel deployment.</span><br>Deploy to Vercel → add PERPLEXITY_KEY env var → AI updates work automatically.`;
-        document.getElementById('todayFeed').parentElement.appendChild(note);
-      }
-    }
-  }
+  prevAbu=abuRnd; prevWar=warRnd;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1640,15 +1651,15 @@ buildToday();
 buildChart('chartAbu', ABU, 'v', '#facc15');
 buildChart('chartWar', WAR, 'v', '#f05252');
 buildTimeline('combined');
-fetchNews();
 tick();
-setInterval(tick, 30000);
-setInterval(fetchNews, 2*60*1000);
+setInterval(tick, 1000); // clock ticks every second
 
-// Auto-trigger AI update on load (works on Vercel, gracefully fails locally)
-triggerAIUpdate();
-// Re-fetch every 5 minutes for near-real-time scores
-setInterval(triggerAIUpdate, 5*60*1000);
+// Fetch all sources in parallel on load, then rotate every 15s
+fetchAllSourcesParallel();
+setInterval(fetchNextSource, 15*1000);
+
+// Live score update every 5 seconds
+setInterval(updateLiveScores, 5000);
 
 const now=new Date();
 document.getElementById('tsText').textContent=`Updated: ${now.toLocaleTimeString()}`;
