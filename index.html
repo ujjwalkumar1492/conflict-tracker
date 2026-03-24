@@ -573,8 +573,8 @@ body::after{
       </div>
       <div class="lterm-body" id="liveTerminal">
         <div class="lterm-init" id="ltermInit">
-          <div><span class="cursor-blink"></span> Connecting to GDELT news stream...</div>
-          <div style="font-size:10px;margin-top:4px;color:var(--t3)">Headlines stream in every 1.5 seconds after fetch</div>
+          <div><span class="cursor-blink"></span> Connecting to live news stream...</div>
+          <div style="font-size:10px;margin-top:4px;color:var(--t3)">Al Jazeera · Reuters · BBC · Guardian · Sky News</div>
         </div>
       </div>
       <div class="lterm-art-list" id="artList"></div>
@@ -606,34 +606,6 @@ body::after{
   <!-- Hidden div kept for fetchNews compat -->
   <div id="newsFeed" style="display:none"></div>
 
-  <!-- ╔═ LIVE DATA EXPLAINER ═══════════════════════════════════╗ -->
-  <div class="explainer sec">
-    <h3>⚡ How Live Data Works — &amp; How to Upgrade This Dashboard</h3>
-    <p>Right now this is a <strong>static HTML file</strong> — all historical data is hardcoded. The news feed at the top is <strong>already live</strong> and pulls real headlines from the <strong>GDELT Project API</strong> (a free, real-time global news tracker). Here's how the different tiers of "live" work:</p>
-    <div class="tier">
-      <div class="t-block">
-        <strong>🟢 Already Live (This File)</strong>
-        The GDELT news feed fetches real headlines every 5 minutes. No setup needed — just open this file in a browser.
-        Uses: <code>api.gdeltproject.org</code>
-      </div>
-      <div class="t-block">
-        <strong>🟡 Semi-Live (Easy Upgrade)</strong>
-        Host this file on any website (Netlify, GitHub Pages, Vercel — all free). A JavaScript <code>setInterval</code> can auto-refresh the full page on a schedule. Add a <code>config.js</code> file you update manually each day with new scores.
-      </div>
-      <div class="t-block">
-        <strong>🔵 Fully Live (Requires Backend)</strong>
-        Connect to <strong>NewsAPI</strong>, <strong>Bing News API</strong>, or scrape primary sources. Write a small backend (Node.js or Python, free on Railway/Render) that updates a JSON file daily. This dashboard reads from that JSON file automatically.
-      </div>
-    </div>
-    <br>
-    <strong style="color:var(--t1)">The simplest path to fully live data:</strong>
-    <ul>
-      <li>Create a free account at <code>newsapi.org</code> (100 req/day free)</li>
-      <li>Replace the GDELT <code>fetchNews()</code> call with NewsAPI — it has better Middle East coverage</li>
-      <li>To auto-update the probability/score numbers, either update this file manually each day, or connect to a small Google Sheet via its JSON API (free, no backend needed)</li>
-      <li>For the most powerful setup: <strong>Perplexity API</strong> can summarise daily events and output structured JSON directly into this dashboard</li>
-    </ul>
-  </div>
 
   <!-- ╔═ TIMELINE ═════════════════════════════════════════════╗ -->
   <div class="sec">
