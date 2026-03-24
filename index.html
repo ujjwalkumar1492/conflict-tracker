@@ -76,33 +76,6 @@ a{color:inherit;text-decoration:none}
 .day-num{font-size:clamp(48px,7vw,80px);font-weight:800;letter-spacing:-.05em;line-height:1;color:var(--b2)}
 .day-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.1em}
 
-/* ── DEADLINE BANNER ───────────────────────────────────────── */
-.deadline-banner{
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
-  background:rgba(251,146,60,.06);
-  border:1px solid rgba(251,146,60,.2);
-  border-radius:var(--r);padding:14px 20px;margin-bottom:12px;
-}
-.db-left{display:flex;align-items:center;gap:14px}
-.db-days{
-  font-size:36px;font-weight:800;letter-spacing:-.04em;line-height:1;
-  color:var(--orange);
-}
-.db-label{display:flex;flex-direction:column;gap:2px}
-.db-title{font-size:13px;font-weight:600;color:var(--t1)}
-.db-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2)}
-.db-divider{width:1px;height:36px;background:rgba(251,146,60,.2);flex-shrink:0}
-.db-right{display:flex;flex-direction:column;gap:4px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2)}
-.db-right strong{color:var(--t1)}
-.db-pill{
-  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;
-  padding:3px 10px;border-radius:100px;
-  background:rgba(251,146,60,.12);color:var(--orange);border:1px solid rgba(251,146,60,.25);
-  white-space:nowrap;flex-shrink:0;
-}
-@keyframes db-pulse{0%,100%{border-color:rgba(251,146,60,.2)}50%{border-color:rgba(251,146,60,.5)}}
-.deadline-banner{animation:db-pulse 3s ease-in-out infinite}
-
 /* ── HERO WIDGET ───────────────────────────────────────────── */
 .hero-primary{margin-bottom:10px}
 .hero-card{
@@ -110,8 +83,7 @@ a{color:inherit;text-decoration:none}
   padding:0;position:relative;overflow:hidden;
 }
 .hero-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-/* Bar reflects score zones: ceasefire→de-escal→active→high→full war */
-.hero-card.w::after{background:linear-gradient(90deg,var(--green) 0%,var(--teal) 10%,var(--yellow) 30%,var(--orange) 60%,var(--red) 100%)}
+.hero-card.w::after{background:linear-gradient(90deg,var(--red) 0%,var(--orange) 40%,var(--teal) 70%,var(--green) 100%)}
 .hero-card.a::after{background:var(--yellow)}
 
 .hc-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--t3);margin-bottom:12px}
@@ -127,70 +99,86 @@ a{color:inherit;text-decoration:none}
 .hc-badge.up{background:rgba(240,82,82,.1);color:var(--red);border:1px solid rgba(240,82,82,.2)}
 .hc-sub{font-size:12px;color:var(--t2);line-height:1.6}
 
-/* ── Numbers row: Score ↔ Window ─── */
-.hw-numbers{display:grid;grid-template-columns:1fr auto 1fr;gap:0;padding:28px 32px 20px}
-.hw-score{display:flex;flex-direction:column}
-.hw-score-val{font-size:80px;font-weight:800;letter-spacing:-.05em;line-height:1;color:var(--green)}
-.hw-score-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);margin-top:6px;letter-spacing:.08em}
+/* ── Status header row ────────────── */
+.hw-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:24px 32px 20px;gap:24px;flex-wrap:wrap;
+}
+.hw-status-label{
+  font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--teal);
+}
+.hw-status-sub{font-size:12px;color:var(--t2);margin-top:4px}
+.hw-header-stats{display:flex;gap:24px;flex-shrink:0}
+.hw-hstat{text-align:right}
+.hw-hstat-val{font-size:22px;font-weight:700;letter-spacing:-.03em}
+.hw-hstat-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:.08em;margin-top:2px}
 
-.hw-connector{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:0 28px;gap:6px;
+/* ── Conflict journey timeline ────── */
+.hw-timeline{padding:0 32px 6px;position:relative}
+/* The track: a horizontal line spanning the full conflict period */
+.hwt-outer{position:relative;height:56px;margin:0 0 4px}
+.hwt-track{
+  position:absolute;top:24px;left:0;right:0;height:4px;
+  background:var(--b2);border-radius:2px;
 }
-.hw-connector-rule{
-  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;
-  color:var(--t2);text-align:center;line-height:1.6;max-width:140px;
+/* Filled portion = elapsed war progress (start to today) */
+.hwt-elapsed{
+  position:absolute;top:0;left:0;height:100%;
+  background:linear-gradient(90deg,var(--red),var(--orange) 60%,var(--yellow));
+  border-radius:2px;transition:width .6s ease;
 }
-.hw-connector-arrow{font-size:18px;color:var(--b3)}
+/* Projected portion = today to projected ceasefire */
+.hwt-proj{
+  position:absolute;top:0;height:100%;
+  background:repeating-linear-gradient(90deg,var(--teal) 0,var(--teal) 4px,transparent 4px,transparent 8px);
+  opacity:.6;border-radius:2px;transition:left .6s ease,width .6s ease;
+}
+/* Buffer zone = projected ceasefire to deadline */
+.hwt-buffer{
+  position:absolute;top:0;height:100%;
+  background:rgba(74,222,128,.15);border-radius:2px;
+  transition:left .6s ease,width .6s ease;
+}
+/* Milestone dots */
+.hwt-dot{
+  position:absolute;top:18px;
+  width:10px;height:10px;border-radius:50%;
+  transform:translateX(-50%);border:2px solid var(--bg);
+  transition:left .6s ease;
+}
+.hwt-dot.start{background:var(--red);left:0}
+.hwt-dot.today{background:var(--t1);box-shadow:0 0 8px rgba(255,255,255,.5);width:12px;height:12px;top:17px}
+.hwt-dot.projected{background:var(--teal);border-style:dashed}
+.hwt-dot.deadline{background:var(--orange);right:0;left:auto;transform:translateX(50%)}
+/* Labels above/below track */
+.hwt-lbl{
+  position:absolute;font-family:'JetBrains Mono',monospace;font-size:9px;
+  white-space:nowrap;transform:translateX(-50%);
+}
+.hwt-lbl.above{top:0;color:var(--t2)}
+.hwt-lbl.below{top:34px;color:var(--t3)}
+.hwt-lbl.start{transform:none;left:0!important}
+.hwt-lbl.deadline{transform:none;right:0!important;left:auto!important;text-align:right}
+/* Ticks row: date labels below the track */
+.hwt-ticks{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--t3);margin-top:2px}
 
-.hw-window{display:flex;flex-direction:column;align-items:flex-end}
-.hw-window-val{font-size:80px;font-weight:800;letter-spacing:-.05em;line-height:1;color:var(--orange)}
-.hw-window-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);margin-top:6px;letter-spacing:.08em;text-align:right}
-
-/* ── Intensity bar with zones ─────── */
-.hw-bar-section{padding:0 32px 20px}
-.iz-bar{
-  height:10px;border-radius:5px;position:relative;
-  display:flex;overflow:hidden;
-}
-.iz-seg{height:100%;flex-shrink:0}
-.iz-marker{
-  position:absolute;top:-5px;width:3px;height:20px;
-  background:var(--t1);border-radius:2px;
-  box-shadow:0 0 8px rgba(255,255,255,.6);
-  transform:translateX(-50%);transition:left .8s cubic-bezier(.4,0,.2,1);
-  z-index:2;
-}
-.iz-peak-marker{
-  position:absolute;top:-3px;width:2px;height:16px;
-  background:rgba(240,82,82,.5);border-radius:1px;
-  transform:translateX(-50%);z-index:1;
-}
-.iz-zones{display:flex;margin-top:5px}
-.iz-zone-lbl{
-  font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--t3);
-  letter-spacing:.06em;text-align:center;flex-shrink:0;overflow:hidden;
-  white-space:nowrap;text-overflow:clip;
-}
-
-/* ── Verdict / pace strip ─────────── */
+/* ── Verdict strip ────────────────── */
 .hw-verdict{
   padding:14px 32px;border-top:1px solid var(--b1);
-  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
 }
-.hw-verdict-main{display:flex;align-items:center;gap:10px}
 .hw-on-track{
   font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;
-  padding:4px 10px;border-radius:100px;
+  padding:4px 10px;border-radius:100px;white-space:nowrap;flex-shrink:0;
 }
 .hw-on-track.ok{background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.25)}
 .hw-on-track.risk{background:rgba(250,204,21,.1);color:var(--yellow);border:1px solid rgba(250,204,21,.25)}
 .hw-on-track.danger{background:rgba(240,82,82,.1);color:var(--red);border:1px solid rgba(240,82,82,.25)}
-.hw-pace{font-size:12px;color:var(--t2)}
-.hw-pace strong{color:var(--t1)}
+.hw-pace{font-size:12px;color:var(--t2);flex:1}
+.hw-pace strong{color:var(--t1);font-weight:600}
 
-/* Number flash animation */
-.hc-val.flash,.cdb-num.flash{animation:numflash .5s ease}
+/* Number flash */
+.hc-val.flash{animation:numflash .5s ease}
 
 /* ── REGIONAL ATTACKS ──────────────────────────────────────── */
 .regional-grid{
@@ -582,12 +570,9 @@ body::after{
 
 /* ── RESPONSIVE ────────────────────────────────────────────── */
 @media(max-width:860px){
-  .hw-numbers{grid-template-columns:1fr 1fr;gap:16px}
-  .hw-connector{display:none}
-  .hw-window{align-items:flex-start}
-  .hw-window-sub{text-align:left}
+  .hw-header{flex-direction:column;align-items:flex-start}
+  .hw-header-stats{gap:16px}
   .hero-secondary{grid-template-columns:1fr}
-  .hw-score-val,.hw-window-val{font-size:60px}
   .stats{grid-template-columns:repeat(3,1fr)}
   .regional-grid{grid-template-columns:repeat(2,1fr)}
   .page-hdr{grid-template-columns:1fr}
@@ -650,82 +635,74 @@ body::after{
     </div>
   </div>
 
-  <!-- ╔═ DEADLINE BANNER ══════════════════════════════════════╗ -->
-  <div class="deadline-banner">
-    <div class="db-left">
-      <div class="db-days" id="deadlineDays">26</div>
-      <div class="db-label">
-        <div class="db-title">days remaining in the de-escalation window</div>
-        <div class="db-sub">Islamabad diplomatic talks · deadline Apr 19, 2026 · if talks collapse → conflict re-escalates</div>
-      </div>
-    </div>
-    <div class="db-divider"></div>
-    <div class="db-right">
-      <div><strong>Window opened:</strong> Mar 23, 2026 — Trump 5-day pause</div>
-      <div><strong>Expires:</strong> Apr 19, 2026 — Islamabad framework deadline</div>
-      <div><strong>Risk if failed:</strong> Return to 85%+ war intensity</div>
-    </div>
-    <div class="db-pill">⚑ DIPLOMATIC WINDOW ACTIVE</div>
-  </div>
-
-  <!-- ╔═ PRIMARY HERO: WAR SCORE ↔ WINDOW ════════════════════╗ -->
+  <!-- ╔═ PRIMARY HERO: CONFLICT TIMELINE ══════════════════════╗ -->
   <div class="hero-primary">
     <div class="hero-card w">
 
-      <!-- Two numbers, explicitly connected -->
-      <div class="hw-numbers">
-        <div class="hw-score">
-          <div class="hc-lbl">War Intensity Score — 0 = ceasefire · 100 = full war</div>
-          <div class="hw-score-val" id="warScoreVal">25</div>
-          <div class="hw-score-sub">/ 100 · DE-ESCALATING</div>
-          <div class="hc-badge dn" id="warScoreBadge" style="margin-top:12px">↓ from peak 95 on Feb 28</div>
+      <!-- Status + key stats -->
+      <div class="hw-header">
+        <div>
+          <div class="hc-lbl">Iran–US Conflict — Live Status</div>
+          <div class="hw-status-label" id="statusLabel">DE-ESCALATING</div>
+          <div class="hw-status-sub" id="warScoreSub">Vance + Witkoff + Kushner heading to Islamabad. 5-day power plant pause in effect.</div>
         </div>
-
-        <div class="hw-connector">
-          <div class="hw-connector-arrow">→</div>
-          <div class="hw-connector-rule">score must reach<br>≤ 10 before this<br>window closes</div>
-        </div>
-
-        <div class="hw-window">
-          <div class="hc-lbl" style="text-align:right">De-escalation window</div>
-          <div class="hw-window-val" id="countdownNum">26</div>
-          <div class="hw-window-sub">DAYS REMAINING<br>DEADLINE · APR 19, 2026</div>
-        </div>
-      </div>
-
-      <!-- Zoned intensity bar -->
-      <div class="hw-bar-section">
-        <div class="iz-bar">
-          <!-- Zones proportional to score range: ceasefire 0-10 / de-escal 10-25 / active 25-65 / high 65-85 / war 85-100 -->
-          <div class="iz-seg" style="width:10%;background:var(--green);opacity:.7"></div>
-          <div class="iz-seg" style="width:15%;background:var(--teal);opacity:.7"></div>
-          <div class="iz-seg" style="width:40%;background:linear-gradient(90deg,rgba(250,204,21,.7),rgba(251,146,60,.7))"></div>
-          <div class="iz-seg" style="width:20%;background:linear-gradient(90deg,rgba(251,146,60,.7),rgba(240,82,82,.7))"></div>
-          <div class="iz-seg" style="width:15%;background:rgba(240,82,82,.7)"></div>
-          <!-- Peak marker at 95% -->
-          <div class="iz-peak-marker" style="left:95%" title="Peak: 95 on Feb 28"></div>
-          <!-- Current position marker (updated by JS) -->
-          <div class="iz-marker" id="intensityMarker" style="left:25%"></div>
-        </div>
-        <!-- Zone labels -->
-        <div class="iz-zones">
-          <div class="iz-zone-lbl" style="width:10%;color:var(--green)">CEASEFIRE</div>
-          <div class="iz-zone-lbl" style="width:15%;color:var(--teal)">DE-ESCAL.</div>
-          <div class="iz-zone-lbl" style="width:40%;color:var(--yellow)">ACTIVE CONFLICT ← current</div>
-          <div class="iz-zone-lbl" style="width:20%;color:var(--orange)">HIGH</div>
-          <div class="iz-zone-lbl" style="width:15%;color:var(--red)">FULL WAR</div>
-        </div>
-      </div>
-
-      <!-- Verdict: rate + projection + margin -->
-      <div class="hw-verdict">
-        <div class="hw-verdict-main">
-          <div class="hw-on-track ok" id="verdictBadge">✓ ON TRACK</div>
-          <div class="hw-pace" id="verdictText">
-            De-escalating at <strong id="rateText">↓ 2.9 pts/day</strong> · ceasefire zone in ~<strong id="projDays">9 days</strong> (Apr 1) · <strong id="marginText">17 days inside the window</strong>
+        <div class="hw-header-stats">
+          <div class="hw-hstat">
+            <div class="hw-hstat-val" id="warScoreVal" style="color:var(--green)">25<span style="font-size:14px;font-weight:400;color:var(--t3)">/100</span></div>
+            <div class="hw-hstat-lbl">WAR INTENSITY NOW</div>
+          </div>
+          <div class="hw-hstat">
+            <div class="hw-hstat-val" id="countdownNum" style="color:var(--orange)">26</div>
+            <div class="hw-hstat-lbl">DAYS TO DEADLINE</div>
+          </div>
+          <div class="hw-hstat">
+            <div class="hw-hstat-val" id="rateDisplay" style="color:var(--teal)">↓2.9</div>
+            <div class="hw-hstat-lbl">PTS/DAY RATE</div>
           </div>
         </div>
-        <div style="font-size:11px;color:var(--t2)" id="warScoreSub">Vance + Witkoff + Kushner heading to Islamabad</div>
+      </div>
+
+      <!-- Conflict journey timeline: Feb 28 → TODAY → proj. ceasefire → Apr 19 deadline -->
+      <!-- Total span = 50 days (Feb 28 to Apr 19). Positions: start=0%, today≈48%, proj≈64%, end=100% -->
+      <div class="hw-timeline">
+        <div class="hwt-outer">
+          <div class="hwt-track">
+            <!-- Elapsed = red→orange (war to today, 0%→48%) -->
+            <div class="hwt-elapsed" id="hwElapsed" style="width:48%"></div>
+            <!-- Projected path = teal dashes (today→proj ceasefire, 48%→64%) -->
+            <div class="hwt-proj" id="hwProj" style="left:48%;width:16%"></div>
+            <!-- Buffer = green tint (proj ceasefire→deadline, 64%→100%) -->
+            <div class="hwt-buffer" id="hwBuffer" style="left:64%;width:36%"></div>
+          </div>
+
+          <!-- Milestone dots -->
+          <div class="hwt-dot start" style="left:0%"></div>
+          <div class="hwt-dot today" id="hwTodayDot" style="left:48%"></div>
+          <div class="hwt-dot projected" id="hwProjDot" style="left:64%"></div>
+          <div class="hwt-dot deadline" style="right:0;left:auto;transform:translateX(50%)"></div>
+
+          <!-- Labels above dots -->
+          <div class="hwt-lbl above start" style="left:0%">FULL WAR · 95/100</div>
+          <div class="hwt-lbl above" id="hwTodayLbl" style="left:48%">TODAY · <span id="hwTodayScore">25</span>/100</div>
+          <div class="hwt-lbl above" id="hwProjLbl" style="left:64%">PROJ. CEASEFIRE</div>
+          <div class="hwt-lbl above deadline" style="right:0">WINDOW CLOSES</div>
+        </div>
+        <!-- Date ticks below -->
+        <div class="hwt-ticks">
+          <span>Feb 28</span>
+          <span>Mar 24 (today)</span>
+          <span id="hwProjDate">~Apr 1</span>
+          <span>Apr 19</span>
+        </div>
+      </div>
+
+      <!-- Verdict -->
+      <div class="hw-verdict">
+        <div class="hw-on-track ok" id="verdictBadge">✓ ON TRACK</div>
+        <div class="hw-pace">
+          Falling at <strong id="rateText">↓ 2.9 pts/day</strong> · ceasefire zone projected <strong id="projDays">~Apr 1</strong> · <strong id="marginText" style="color:var(--green)">18 days before the Apr 19 deadline</strong>
+        </div>
+        <div class="hc-badge dn" id="warScoreBadge">↓ from peak 95 on Feb 28</div>
       </div>
 
     </div>
@@ -831,6 +808,18 @@ body::after{
           <span class="rg-total-val c-yl">46</span>
         </div>
         <div><span class="rg-status low">LOW</span></div>
+      </div>
+
+      <div class="rg-cell">
+        <div class="rg-country">Israel</div>
+        <div class="rg-role">Negev · Tel Aviv · Dimona nuclear site</div>
+        <div class="rg-row"><span class="rg-key">Today</span><span class="rg-val c-yl">0 BMs · 4 UAVs</span></div>
+        <div class="rg-row"><span class="rg-key">All-time</span><span class="rg-val c-or">22 BMs · 78 UAVs</span></div>
+        <div class="rg-total">
+          <span class="rg-total-lbl">Total projectiles</span>
+          <span class="rg-total-val c-or">100</span>
+        </div>
+        <div><span class="rg-status warm">ELEVATED</span></div>
       </div>
 
     </div>
@@ -944,13 +933,22 @@ body::after{
         <div class="hc-sub" id="abuProbSub">7 BMs + 16 UAVs intercepted overnight. Diplomacy driving risk lower. 5-day pause still in effect.</div>
         <div class="hc-badge dn" id="abuProbBadge">↓ −55pp from peak 97% on Feb 28</div>
       </div>
-      <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:16px 20px">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:12px">UAE Intercept Summary</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="stat" style="border-radius:4px"><div class="stat-n">BMs Intercepted</div><div class="stat-v c-red">352+</div></div>
-          <div class="stat" style="border-radius:4px"><div class="stat-n">UAVs Intercepted</div><div class="stat-v c-or">1,789+</div></div>
-          <div class="stat" style="border-radius:4px"><div class="stat-n">Cruise Missiles</div><div class="stat-v c-yl">15+</div></div>
-          <div class="stat" style="border-radius:4px"><div class="stat-n">UAE Casualties</div><div class="stat-v c-wh">8 killed · 157 inj.</div></div>
+      <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:16px 20px;display:flex;flex-direction:column;gap:12px">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">Today's Attacks — Mar 24</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="stat" style="border-radius:4px"><div class="stat-n">BMs Today</div><div class="stat-v c-or">7</div></div>
+            <div class="stat" style="border-radius:4px"><div class="stat-n">UAVs Today</div><div class="stat-v c-yl">16</div></div>
+          </div>
+        </div>
+        <div style="border-top:1px solid var(--b1);padding-top:12px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">All-time since Feb 28</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="stat" style="border-radius:4px"><div class="stat-n">BMs Intercepted</div><div class="stat-v c-red">352+</div></div>
+            <div class="stat" style="border-radius:4px"><div class="stat-n">UAVs Intercepted</div><div class="stat-v c-or">1,789+</div></div>
+            <div class="stat" style="border-radius:4px"><div class="stat-n">Cruise Missiles</div><div class="stat-v c-yl">15+</div></div>
+            <div class="stat" style="border-radius:4px"><div class="stat-n">Casualties</div><div class="stat-v c-wh">8 killed · 157 inj.</div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1946,38 +1944,74 @@ function updateDeadlineCountdown(){
   return daysLeft;
 }
 
-function updateIntensityBar(score){
-  const pct=Math.max(1,Math.min(99,score));
-  const marker=document.getElementById('intensityMarker');
-  if(marker)marker.style.left=`${pct}%`;
-}
+// Timeline geometry: total span = Feb 28 → Apr 19 = 50 days
+const SPAN_DAYS=50;
+const WAR_START=new Date('2026-02-28T00:00:00Z');
 
-function updateVerdict(score, daysLeft){
+function dayPct(d){ return Math.min(100,Math.max(0,((d-WAR_START)/(1000*60*60*24))/SPAN_DAYS*100)); }
+
+function updateTimeline(score, daysLeft){
   const rate=calcDeescRate(score);
   const daysToZone=rate>0?(score-CEASEFIRE_ZONE)/rate:999;
-  const margin=daysLeft-daysToZone;
   const projDate=new Date();
-  projDate.setDate(projDate.getDate()+Math.ceil(daysToZone));
+  projDate.setDate(projDate.getDate()+Math.round(daysToZone));
+
+  const todayPct=dayPct(new Date());           // ~48%
+  const projPct =dayPct(projDate);             // ~64% if on track
+  const deadlinePct=100;
+
+  // Update track segments
+  const elapsed=document.getElementById('hwElapsed');
+  const proj=document.getElementById('hwProj');
+  const buffer=document.getElementById('hwBuffer');
+  if(elapsed)elapsed.style.width=`${todayPct}%`;
+  if(proj){proj.style.left=`${todayPct}%`;proj.style.width=`${Math.max(0,projPct-todayPct)}%`;}
+  if(buffer){buffer.style.left=`${projPct}%`;buffer.style.width=`${deadlinePct-projPct}%`;}
+
+  // Update dots and labels
+  const td=document.getElementById('hwTodayDot');
+  const pd=document.getElementById('hwProjDot');
+  const tl=document.getElementById('hwTodayLbl');
+  const pl=document.getElementById('hwProjLbl');
+  const ts=document.getElementById('hwTodayScore');
+  const rd=document.getElementById('rateDisplay');
+  if(td)td.style.left=`${todayPct}%`;
+  if(pd)pd.style.left=`${projPct}%`;
+  if(tl)tl.style.left=`${todayPct}%`;
+  if(pl)pl.style.left=`${projPct}%`;
+  if(ts)ts.textContent=Math.round(score);
+  if(rd)rd.textContent=`↓${rate.toFixed(1)}`;
+
+  // Verdict
+  const margin=daysLeft-daysToZone;
+  const badge=document.getElementById('verdictBadge');
+  const rateEl=document.getElementById('rateText');
+  const projEl=document.getElementById('projDays');
+  const marginEl=document.getElementById('marginText');
+  const projDateEl=document.getElementById('hwProjDate');
   const projStr=projDate.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
 
-  // Update verdict badge
-  const badge=document.getElementById('verdictBadge');
   if(badge){
     if(margin>10){badge.className='hw-on-track ok';badge.textContent='✓ ON TRACK';}
     else if(margin>0){badge.className='hw-on-track risk';badge.textContent='⚠ AT RISK';}
     else{badge.className='hw-on-track danger';badge.textContent='✗ OFF TRACK';}
   }
-
-  // Update pace text
-  const rateEl=document.getElementById('rateText');
-  const projEl=document.getElementById('projDays');
-  const marginEl=document.getElementById('marginText');
   if(rateEl)rateEl.textContent=`↓ ${rate.toFixed(1)} pts/day`;
-  if(projEl)projEl.textContent=daysToZone<daysLeft?`~${Math.ceil(daysToZone)} days (${projStr})`:'exceeds window';
+  if(projEl)projEl.textContent=`~${projStr}`;
+  if(projDateEl)projDateEl.textContent=`~${projStr}`;
   if(marginEl){
-    if(margin>0)marginEl.textContent=`${Math.round(margin)} days inside the window`;
-    else marginEl.textContent=`${Math.round(-margin)} days past deadline`;
-    marginEl.style.color=margin>10?'var(--green)':margin>0?'var(--yellow)':'var(--red)';
+    if(margin>0){marginEl.textContent=`${Math.round(margin)} days before the Apr 19 deadline`;marginEl.style.color='var(--green)';}
+    else{marginEl.textContent=`${Math.round(-margin)} days past deadline`;marginEl.style.color='var(--red)';}
+  }
+
+  // Status label color
+  const sl=document.getElementById('statusLabel');
+  if(sl){
+    if(score<15){sl.textContent='NEAR CEASEFIRE';sl.style.color='var(--green)';}
+    else if(score<35){sl.textContent='DE-ESCALATING';sl.style.color='var(--teal)';}
+    else if(score<60){sl.textContent='ACTIVE CONFLICT';sl.style.color='var(--yellow)';}
+    else if(score<80){sl.textContent='HIGH INTENSITY';sl.style.color='var(--orange)';}
+    else{sl.textContent='FULL WAR';sl.style.color='var(--red)';}
   }
 }
 
@@ -2027,7 +2061,7 @@ function updateLiveScores(){
 
   prevAbu=abuRnd; prevWar=warRnd;
   const daysLeft=updateDeadlineCountdown();
-  updateVerdict(warRnd, daysLeft);
+  updateTimeline(warRnd, daysLeft);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -2046,8 +2080,7 @@ setInterval(fetchNextSource, 15*1000);
 
 // Live score + countdown update every 5 seconds
 const initDaysLeft=updateDeadlineCountdown();
-updateIntensityBar(25);
-updateVerdict(25, initDaysLeft);
+updateTimeline(25, initDaysLeft);
 setInterval(updateLiveScores, 5000);
 
 const now=new Date();
