@@ -77,19 +77,24 @@ a{color:inherit;text-decoration:none}
 .day-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.1em}
 
 /* ── HERO CARDS ────────────────────────────────────────────── */
-.hero{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.hero-primary{margin-bottom:10px}
 .hero-card{
   background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);
-  padding:24px 24px 20px;position:relative;overflow:hidden;
+  padding:28px 32px 24px;position:relative;overflow:hidden;
 }
 .hero-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.hero-card.w::after{background:linear-gradient(90deg,var(--red),var(--orange),var(--green))}
 .hero-card.a::after{background:var(--yellow)}
-.hero-card.w::after{background:var(--green)}
 .hc-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--t3);margin-bottom:14px}
-.hc-val{font-size:60px;font-weight:800;letter-spacing:-.04em;line-height:1}
-.hc-val.a{color:var(--yellow)}
+/* Primary war score: big number with supporting metrics inline */
+.hc-primary-row{display:flex;align-items:flex-end;gap:32px;flex-wrap:wrap}
+.hc-val{font-size:80px;font-weight:800;letter-spacing:-.04em;line-height:1}
 .hc-val.w{color:var(--green)}
-.hc-sub{font-size:12px;color:var(--t2);margin-top:8px;line-height:1.55}
+.hc-val.a{color:var(--yellow)}
+.hc-supporting{display:flex;flex-direction:column;gap:6px;padding-bottom:6px}
+.hc-stat{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t2)}
+.hc-stat strong{color:var(--t1);font-weight:600}
+.hc-sub{font-size:13px;color:var(--t2);margin-top:12px;line-height:1.6;max-width:680px}
 .hc-badge{
   display:inline-flex;align-items:center;gap:4px;
   font-family:'JetBrains Mono',monospace;font-size:9px;
@@ -97,6 +102,20 @@ a{color:inherit;text-decoration:none}
 }
 .hc-badge.dn{background:rgba(74,222,128,.08);color:var(--green);border:1px solid rgba(74,222,128,.18)}
 .hc-badge.up{background:rgba(240,82,82,.1);color:var(--red);border:1px solid rgba(240,82,82,.2)}
+
+/* Abu Dhabi secondary card */
+.secondary-section{margin-top:56px;border-top:1px solid var(--b1);padding-top:32px}
+.secondary-label{
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--t3);margin-bottom:20px;
+  display:flex;align-items:center;gap:10px;
+}
+.secondary-label::after{content:'';flex:1;height:1px;background:var(--b1)}
+.hero-secondary{display:grid;grid-template-columns:280px 1fr;gap:10px;margin-bottom:10px}
+.hero-card.secondary{padding:18px 20px 16px}
+.hero-card.secondary .hc-val{font-size:44px}
+.hero-card.secondary .hc-sub{font-size:11px;margin-top:6px}
+.hero-card.secondary .hc-badge{margin-top:8px}
 
 /* ── STAT STRIP ────────────────────────────────────────────── */
 .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:32px}
@@ -154,9 +173,8 @@ a{color:inherit;text-decoration:none}
 .t-hl{font-size:13px;font-weight:500;color:var(--t1);margin-bottom:3px}
 .t-detail{font-size:12px;color:var(--t2);line-height:1.55}
 
-/* ── CHART GRID ────────────────────────────────────────────── */
-.charts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:32px}
-.chart-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden}
+/* ── CHART ─────────────────────────────────────────────────── */
+.chart-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:0}
 .chart-hdr{padding:12px 18px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between}
 .chart-ttl{font-size:12px;font-weight:600}
 .chart-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2)}
@@ -452,8 +470,9 @@ body::after{
 
 /* ── RESPONSIVE ────────────────────────────────────────────── */
 @media(max-width:860px){
-  .hero{grid-template-columns:1fr}
-  .charts{grid-template-columns:1fr}
+  .hero-secondary{grid-template-columns:1fr}
+  .hc-primary-row{flex-direction:column;align-items:flex-start;gap:16px}
+  .hc-val{font-size:60px}
   .stats{grid-template-columns:repeat(3,1fr)}
   .page-hdr{grid-template-columns:1fr}
   .day-badge{display:none}
@@ -494,8 +513,8 @@ body::after{
   <!-- ╔═ PAGE HEADER ══════════════════════════════════════════╗ -->
   <div class="page-hdr">
     <div>
-      <div class="page-title">Iran–US War<br><em>Intelligence Dashboard</em></div>
-      <div class="page-sub">Feb 28 — Mar 24, 2026 · Dual tracker: Abu Dhabi strike probability + Conflict intensity</div>
+      <div class="page-title">Iran–US War<br><em>Live Intelligence</em></div>
+      <div class="page-sub">Feb 28 — Mar 24, 2026 · Conflict intensity tracker · Operation Epic Fury</div>
     </div>
     <div class="day-badge">
       <div class="day-num">D+24</div>
@@ -503,53 +522,46 @@ body::after{
     </div>
   </div>
 
-  <!-- ╔═ HERO METRICS ═════════════════════════════════════════╗ -->
-  <div class="hero">
-    <div class="hero-card a">
-      <div class="hc-lbl">Abu Dhabi Attack Probability — Today</div>
-      <div class="hc-val a" id="abuProbVal">42%</div>
-      <div class="hc-sub" id="abuProbSub">7 BMs + 16 UAVs intercepted overnight. Diplomacy driving risk lower. 5-day pause still in effect.</div>
-      <div class="hc-badge dn" id="abuProbBadge">↓ −55pp from peak 97% on Feb 28</div>
-    </div>
+  <!-- ╔═ PRIMARY HERO: WAR INTENSITY ══════════════════════════╗ -->
+  <div class="hero-primary">
     <div class="hero-card w">
-      <div class="hc-lbl">Iran–US War Intensity Score — Today</div>
-      <div class="hc-val w" id="warScoreVal">25<span style="font-size:26px;font-weight:400;color:var(--t3)">/100</span></div>
+      <div class="hc-lbl">Iran–US War Intensity Score — Live</div>
+      <div class="hc-primary-row">
+        <div class="hc-val w" id="warScoreVal">25<span style="font-size:32px;font-weight:400;color:var(--t3)">/100</span></div>
+        <div class="hc-supporting">
+          <div class="hc-stat"><strong>Status</strong> — Active conflict, de-escalation phase</div>
+          <div class="hc-stat"><strong>Hormuz</strong> — <span style="color:var(--yellow)">Restricted</span></div>
+          <div class="hc-stat"><strong>Brent Crude</strong> — <span style="color:var(--green)">~$99</span></div>
+          <div class="hc-stat"><strong>Diplomacy</strong> — Islamabad talks in progress</div>
+        </div>
+      </div>
       <div class="hc-sub" id="warScoreSub">Vance + Witkoff + Kushner heading to Islamabad. Closest to formal talks since war began Feb 28.</div>
       <div class="hc-badge dn" id="warScoreBadge">↓ −70pts from peak 95 on Feb 28</div>
     </div>
   </div>
 
-  <!-- ╔═ STAT STRIP ═══════════════════════════════════════════╗ -->
+  <!-- ╔═ STAT STRIP — Iran war focused ═══════════════════════╗ -->
   <div class="stats">
     <div class="stat"><div class="stat-n">War Start</div><div class="stat-v c-red">Feb 28</div></div>
     <div class="stat"><div class="stat-n">Days Active</div><div class="stat-v c-or">25</div></div>
-    <div class="stat"><div class="stat-n">UAE BMs Intercepted</div><div class="stat-v c-red">352+</div></div>
-    <div class="stat"><div class="stat-n">UAE UAVs Intercepted</div><div class="stat-v c-or">1,789+</div></div>
+    <div class="stat"><div class="stat-n">Ceasefire</div><div class="stat-v c-yl">Talks Active</div></div>
+    <div class="stat"><div class="stat-n">US Strikes on Iran</div><div class="stat-v c-red">72+ sites</div></div>
     <div class="stat"><div class="stat-n">Hormuz Strait</div><div class="stat-v c-yl">Restricted</div></div>
     <div class="stat"><div class="stat-n">Brent Crude</div><div class="stat-v c-gr">~$99</div></div>
   </div>
 
-  <!-- ╔═ CHARTS ═══════════════════════════════════════════════╗ -->
+  <!-- ╔═ WAR INTENSITY CHART ═══════════════════════════════════╗ -->
   <div class="sec">
     <div class="sec-hdr">
-      <span class="sec-title">Trend Curves</span>
-      <span class="sec-meta">Feb 25 — Mar 24, 2026</span>
+      <span class="sec-title">War Intensity Curve</span>
+      <span class="sec-meta">Feb 28 — Mar 24, 2026 · 1 = ceasefire · 100 = full war</span>
     </div>
-    <div class="charts">
-      <div class="chart-card">
-        <div class="chart-hdr">
-          <div class="chart-ttl">Abu Dhabi Attack Probability (%)</div>
-          <div class="chart-meta">42% today · peak 97%</div>
-        </div>
-        <div class="chart-body"><svg class="ch" id="chartAbu" viewBox="0 0 580 160" preserveAspectRatio="none"></svg></div>
+    <div class="chart-card">
+      <div class="chart-hdr">
+        <div class="chart-ttl">Iran–US War Intensity Score (1–100)</div>
+        <div class="chart-meta">25 today · peak 95 on Feb 28</div>
       </div>
-      <div class="chart-card">
-        <div class="chart-hdr">
-          <div class="chart-ttl">Iran–US War Intensity (1–100)</div>
-          <div class="chart-meta">25 today · peak 95</div>
-        </div>
-        <div class="chart-body"><svg class="ch" id="chartWar" viewBox="0 0 580 160" preserveAspectRatio="none"></svg></div>
-      </div>
+      <div class="chart-body"><svg class="ch" id="chartWar" viewBox="0 0 1160 160" preserveAspectRatio="none"></svg></div>
     </div>
   </div>
 
@@ -620,9 +632,9 @@ body::after{
       <span class="sec-meta">Newest first · click any row to expand</span>
     </div>
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('combined',this)">Combined View</button>
+      <button class="tab active" onclick="switchTab('war',this)">Iran–US War</button>
+      <button class="tab" onclick="switchTab('combined',this)">Combined View</button>
       <button class="tab" onclick="switchTab('abu',this)">Abu Dhabi Tracker</button>
-      <button class="tab" onclick="switchTab('war',this)">Iran–US War</button>
     </div>
     <div class="scale" id="scaleLegend">
       <span class="scale-lbl">Scale:</span>
@@ -633,6 +645,43 @@ body::after{
       <div class="sc"><div class="sc-dot" style="background:var(--teal)"></div><span>Ceasefire Zone</span></div>
     </div>
     <div class="timeline" id="tl"></div>
+  </div>
+
+  <!-- ╔═ ABU DHABI SECONDARY SECTION ══════════════════════════╗ -->
+  <div class="secondary-section">
+    <div class="secondary-label">Abu Dhabi Strike Risk — Secondary Tracker</div>
+
+    <div class="hero-secondary">
+      <div class="hero-card a secondary">
+        <div class="hc-lbl">Abu Dhabi Attack Probability — Today</div>
+        <div class="hc-val a" id="abuProbVal">42%</div>
+        <div class="hc-sub" id="abuProbSub">7 BMs + 16 UAVs intercepted overnight. Diplomacy driving risk lower. 5-day pause still in effect.</div>
+        <div class="hc-badge dn" id="abuProbBadge">↓ −55pp from peak 97% on Feb 28</div>
+      </div>
+      <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:16px 20px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:12px">UAE Intercept Summary</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="stat" style="border-radius:4px"><div class="stat-n">BMs Intercepted</div><div class="stat-v c-red">352+</div></div>
+          <div class="stat" style="border-radius:4px"><div class="stat-n">UAVs Intercepted</div><div class="stat-v c-or">1,789+</div></div>
+          <div class="stat" style="border-radius:4px"><div class="stat-n">Cruise Missiles</div><div class="stat-v c-yl">15+</div></div>
+          <div class="stat" style="border-radius:4px"><div class="stat-n">UAE Casualties</div><div class="stat-v c-wh">8 killed · 157 inj.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec" style="margin-top:10px">
+      <div class="sec-hdr">
+        <span class="sec-title">Abu Dhabi Attack Probability Curve</span>
+        <span class="sec-meta">Feb 28 — Mar 24, 2026 · 42% today · peak 97%</span>
+      </div>
+      <div class="chart-card">
+        <div class="chart-hdr">
+          <div class="chart-ttl">Abu Dhabi Attack Probability (%)</div>
+          <div class="chart-meta">42% today · peak 97% on Feb 28</div>
+        </div>
+        <div class="chart-body"><svg class="ch" id="chartAbu" viewBox="0 0 1160 160" preserveAspectRatio="none"></svg></div>
+      </div>
+    </div>
   </div>
 
   <!-- ╔═ METHODOLOGY ══════════════════════════════════════════╗ -->
@@ -1650,7 +1699,7 @@ function updateLiveScores(){
 buildToday();
 buildChart('chartAbu', ABU, 'v', '#facc15');
 buildChart('chartWar', WAR, 'v', '#f05252');
-buildTimeline('combined');
+buildTimeline('war');
 tick();
 setInterval(tick, 1000); // clock ticks every second
 
