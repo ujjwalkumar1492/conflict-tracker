@@ -543,7 +543,7 @@ body::after{
     <div class="stat"><div class="stat-n">Days Active</div><div class="stat-v c-or">25</div></div>
     <div class="stat"><div class="stat-n">UAE BMs Intercepted</div><div class="stat-v c-red">352+</div></div>
     <div class="stat"><div class="stat-n">UAE UAVs Intercepted</div><div class="stat-v c-or">1,789+</div></div>
-    <div class="stat"><div class="stat-n">UAE Casualties</div><div class="stat-v c-yl">8 KIA · 157+</div></div>
+    <div class="stat"><div class="stat-n">Hormuz Strait</div><div class="stat-v c-yl">Restricted</div></div>
     <div class="stat"><div class="stat-n">Brent Crude</div><div class="stat-v c-gr">~$99</div></div>
   </div>
 
@@ -1563,6 +1563,18 @@ function applyAIUpdate(data){
     });
   }
 
+  // ── Update live stat strip values ────────────────────────
+  if(data.oil_price){
+    const oilEl=document.querySelector('.stat:nth-child(6) .stat-v');
+    if(oilEl)oilEl.textContent=data.oil_price;
+  }
+  if(data.hormuz){
+    const hEl=document.querySelector('.stat:nth-child(5) .stat-v');
+    const hMap={open:'Open',restricted:'Restricted',closed:'CLOSED'};
+    const hCls={open:'c-gr',restricted:'c-yl',closed:'c-red'};
+    if(hEl){hEl.textContent=hMap[data.hormuz]||data.hormuz;hEl.className=`stat-v ${hCls[data.hormuz]||'c-yl'}`;}
+  }
+
   aiLastUpdated=new Date();
   setAIBadge('ok',`⬡ AI · ${aiLastUpdated.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`);
 }
@@ -1614,8 +1626,8 @@ setInterval(fetchNews, 2*60*1000);
 
 // Auto-trigger AI update on load (works on Vercel, gracefully fails locally)
 triggerAIUpdate();
-// Re-fetch AI update every 30 minutes
-setInterval(triggerAIUpdate, 30*60*1000);
+// Re-fetch every 5 minutes for near-real-time scores
+setInterval(triggerAIUpdate, 5*60*1000);
 
 const now=new Date();
 document.getElementById('tsText').textContent=`Updated: ${now.toLocaleTimeString()}`;
