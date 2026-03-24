@@ -76,32 +76,126 @@ a{color:inherit;text-decoration:none}
 .day-num{font-size:clamp(48px,7vw,80px);font-weight:800;letter-spacing:-.05em;line-height:1;color:var(--b2)}
 .day-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.1em}
 
-/* ── HERO CARDS ────────────────────────────────────────────── */
+/* ── DEADLINE BANNER ───────────────────────────────────────── */
+.deadline-banner{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  background:rgba(251,146,60,.06);
+  border:1px solid rgba(251,146,60,.2);
+  border-radius:var(--r);padding:14px 20px;margin-bottom:12px;
+}
+.db-left{display:flex;align-items:center;gap:14px}
+.db-days{
+  font-size:36px;font-weight:800;letter-spacing:-.04em;line-height:1;
+  color:var(--orange);
+}
+.db-label{display:flex;flex-direction:column;gap:2px}
+.db-title{font-size:13px;font-weight:600;color:var(--t1)}
+.db-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2)}
+.db-divider{width:1px;height:36px;background:rgba(251,146,60,.2);flex-shrink:0}
+.db-right{display:flex;flex-direction:column;gap:4px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2)}
+.db-right strong{color:var(--t1)}
+.db-pill{
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;
+  padding:3px 10px;border-radius:100px;
+  background:rgba(251,146,60,.12);color:var(--orange);border:1px solid rgba(251,146,60,.25);
+  white-space:nowrap;flex-shrink:0;
+}
+@keyframes db-pulse{0%,100%{border-color:rgba(251,146,60,.2)}50%{border-color:rgba(251,146,60,.5)}}
+.deadline-banner{animation:db-pulse 3s ease-in-out infinite}
+
+/* ── HERO WIDGET ───────────────────────────────────────────── */
 .hero-primary{margin-bottom:10px}
 .hero-card{
   background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);
-  padding:28px 32px 24px;position:relative;overflow:hidden;
+  padding:0;position:relative;overflow:hidden;
 }
 .hero-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-.hero-card.w::after{background:linear-gradient(90deg,var(--red),var(--orange),var(--green))}
+.hero-card.w::after{background:linear-gradient(90deg,var(--red) 0%,var(--orange) 35%,var(--yellow) 60%,var(--green) 100%)}
 .hero-card.a::after{background:var(--yellow)}
-.hc-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--t3);margin-bottom:14px}
-/* Primary war score: big number with supporting metrics inline */
-.hc-primary-row{display:flex;align-items:flex-end;gap:32px;flex-wrap:wrap}
-.hc-val{font-size:80px;font-weight:800;letter-spacing:-.04em;line-height:1}
+
+/* 3-column layout inside the main hero */
+.hero-grid{display:grid;grid-template-columns:1fr 1px 1fr 1px 260px}
+.hero-divider{background:var(--b1);margin:24px 0}
+.hero-col{padding:28px 32px}
+.hero-col.center{padding:28px 28px}
+.hero-col.right{padding:24px 28px;display:flex;flex-direction:column;gap:14px}
+
+/* War score column */
+.hc-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--t3);margin-bottom:12px}
+.hc-val{font-size:72px;font-weight:800;letter-spacing:-.04em;line-height:1}
 .hc-val.w{color:var(--green)}
 .hc-val.a{color:var(--yellow)}
-.hc-supporting{display:flex;flex-direction:column;gap:6px;padding-bottom:6px}
-.hc-stat{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t2)}
-.hc-stat strong{color:var(--t1);font-weight:600}
-.hc-sub{font-size:13px;color:var(--t2);margin-top:12px;line-height:1.6;max-width:680px}
+
+/* Intensity bar */
+.intensity-bar-wrap{margin-top:16px}
+.intensity-bar-labels{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--t3);margin-bottom:5px}
+.intensity-bar-track{height:6px;background:var(--b2);border-radius:3px;position:relative;overflow:visible}
+.intensity-bar-fill{
+  height:100%;border-radius:3px;
+  background:linear-gradient(90deg,var(--green),var(--yellow) 50%,var(--red));
+  background-size:580px 100%;
+  transition:width .8s cubic-bezier(.4,0,.2,1);
+}
+.intensity-bar-marker{
+  position:absolute;top:-3px;
+  width:2px;height:12px;background:var(--t1);border-radius:1px;
+  box-shadow:0 0 6px rgba(255,255,255,.4);
+  transform:translateX(-50%);
+}
+
+/* Countdown column (center) */
+.countdown-block{text-align:center}
+.cdb-num{
+  font-size:96px;font-weight:800;letter-spacing:-.05em;line-height:1;
+  color:var(--orange);
+}
+.cdb-unit{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--t2);margin-top:4px}
+.cdb-deadline{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);margin-top:8px}
+.cdb-what{font-size:12px;color:var(--t2);margin-top:10px;line-height:1.5;max-width:220px;margin-inline:auto}
+
+/* Right column: key signals */
+.signal-row{display:flex;flex-direction:column;gap:3px}
+.signal-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
+.signal-val{font-size:13px;font-weight:600;color:var(--t1)}
+.signal-meta{font-size:11px;color:var(--t2)}
+.hero-bottom-bar{
+  padding:14px 32px;border-top:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+}
+.hc-sub{font-size:12px;color:var(--t2);line-height:1.6;flex:1}
 .hc-badge{
   display:inline-flex;align-items:center;gap:4px;
   font-family:'JetBrains Mono',monospace;font-size:9px;
-  padding:3px 8px;border-radius:100px;margin-top:10px;
+  padding:3px 8px;border-radius:100px;flex-shrink:0;
 }
 .hc-badge.dn{background:rgba(74,222,128,.08);color:var(--green);border:1px solid rgba(74,222,128,.18)}
 .hc-badge.up{background:rgba(240,82,82,.1);color:var(--red);border:1px solid rgba(240,82,82,.2)}
+
+/* Number flash animation */
+.hc-val.flash,.cdb-num.flash{animation:numflash .5s ease}
+
+/* ── REGIONAL ATTACKS ──────────────────────────────────────── */
+.regional-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:32px;
+}
+.rg-cell{background:var(--s1);padding:14px 16px}
+.rg-country{font-size:12px;font-weight:600;color:var(--t1);margin-bottom:2px}
+.rg-role{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--t3);letter-spacing:.07em;margin-bottom:10px}
+.rg-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px}
+.rg-key{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3)}
+.rg-val{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600}
+.rg-total{margin-top:8px;padding-top:8px;border-top:1px solid var(--b1);display:flex;justify-content:space-between;align-items:baseline}
+.rg-total-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--t3)}
+.rg-total-val{font-size:13px;font-weight:700}
+.rg-status{
+  display:inline-block;font-family:'JetBrains Mono',monospace;font-size:8px;
+  padding:2px 6px;border-radius:100px;margin-top:6px;
+}
+.rg-status.hot{background:rgba(240,82,82,.1);color:var(--red);border:1px solid rgba(240,82,82,.2)}
+.rg-status.warm{background:rgba(251,146,60,.1);color:var(--orange);border:1px solid rgba(251,146,60,.2)}
+.rg-status.watch{background:rgba(250,204,21,.08);color:var(--yellow);border:1px solid rgba(250,204,21,.18)}
+.rg-status.low{background:rgba(74,222,128,.06);color:var(--green);border:1px solid rgba(74,222,128,.15)}
 
 /* Abu Dhabi secondary card */
 .secondary-section{margin-top:56px;border-top:1px solid var(--b1);padding-top:32px}
@@ -469,14 +563,37 @@ body::after{
 .score-tick{font-size:11px;font-weight:600;margin-left:4px;transition:color .3s}
 
 /* ── RESPONSIVE ────────────────────────────────────────────── */
+@media(max-width:1024px){
+  .hero-grid{grid-template-columns:1fr 1px 1fr}
+  .hero-grid .hero-col.right{display:none}
+  .hero-grid .hero-divider:last-of-type{display:none}
+}
 @media(max-width:860px){
+  .hero-grid{grid-template-columns:1fr}
+  .hero-grid .hero-divider{display:none}
+  .hero-grid .hero-col{padding:20px 20px}
+  .hero-grid .hero-col.center{border-top:1px solid var(--b1)}
   .hero-secondary{grid-template-columns:1fr}
-  .hc-primary-row{flex-direction:column;align-items:flex-start;gap:16px}
-  .hc-val{font-size:60px}
+  .cdb-num{font-size:72px}
+  .hc-val{font-size:56px}
   .stats{grid-template-columns:repeat(3,1fr)}
+  .regional-grid{grid-template-columns:repeat(2,1fr)}
   .page-hdr{grid-template-columns:1fr}
   .day-badge{display:none}
+  .deadline-banner{flex-wrap:wrap;gap:10px}
+  .db-divider{display:none}
+  .db-right{display:none}
   .tl-main{grid-template-columns:72px 58px 1fr 24px}
+}
+@media(max-width:520px){
+  .regional-grid{grid-template-columns:1fr}
+  .wrap{padding:16px 12px 60px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .tl-sum{display:none}
+  .tl.open .tl-detail{grid-template-columns:1fr}
+  .explainer .tier{grid-template-columns:1fr}
+  .topbar-r .ts{display:none}
+  .t-row{grid-template-columns:56px 68px 1fr}
 }
 @media(max-width:520px){
   .wrap{padding:16px 12px 60px}
@@ -514,7 +631,7 @@ body::after{
   <div class="page-hdr">
     <div>
       <div class="page-title">Iran–US War<br><em>Live Intelligence</em></div>
-      <div class="page-sub">Feb 28 — Mar 24, 2026 · Conflict intensity tracker · Operation Epic Fury</div>
+      <div class="page-sub">Feb 28 — Mar 24, 2026 · Operation Epic Fury · D+24</div>
     </div>
     <div class="day-badge">
       <div class="day-num">D+24</div>
@@ -522,25 +639,94 @@ body::after{
     </div>
   </div>
 
-  <!-- ╔═ PRIMARY HERO: WAR INTENSITY ══════════════════════════╗ -->
+  <!-- ╔═ DEADLINE BANNER ══════════════════════════════════════╗ -->
+  <div class="deadline-banner">
+    <div class="db-left">
+      <div class="db-days" id="deadlineDays">26</div>
+      <div class="db-label">
+        <div class="db-title">days remaining in the de-escalation window</div>
+        <div class="db-sub">Islamabad diplomatic talks · deadline Apr 19, 2026 · if talks collapse → conflict re-escalates</div>
+      </div>
+    </div>
+    <div class="db-divider"></div>
+    <div class="db-right">
+      <div><strong>Window opened:</strong> Mar 23, 2026 — Trump 5-day pause</div>
+      <div><strong>Expires:</strong> Apr 19, 2026 — Islamabad framework deadline</div>
+      <div><strong>Risk if failed:</strong> Return to 85%+ war intensity</div>
+    </div>
+    <div class="db-pill">⚑ DIPLOMATIC WINDOW ACTIVE</div>
+  </div>
+
+  <!-- ╔═ PRIMARY HERO: REDESIGNED ══════════════════════════════╗ -->
   <div class="hero-primary">
     <div class="hero-card w">
-      <div class="hc-lbl">Iran–US War Intensity Score — Live</div>
-      <div class="hc-primary-row">
-        <div class="hc-val w" id="warScoreVal">25<span style="font-size:32px;font-weight:400;color:var(--t3)">/100</span></div>
-        <div class="hc-supporting">
-          <div class="hc-stat"><strong>Status</strong> — Active conflict, de-escalation phase</div>
-          <div class="hc-stat"><strong>Hormuz</strong> — <span style="color:var(--yellow)">Restricted</span></div>
-          <div class="hc-stat"><strong>Brent Crude</strong> — <span style="color:var(--green)">~$99</span></div>
-          <div class="hc-stat"><strong>Diplomacy</strong> — Islamabad talks in progress</div>
+      <div class="hero-grid">
+
+        <!-- Col 1: War Intensity Score + gauge -->
+        <div class="hero-col">
+          <div class="hc-lbl">Iran–US War Intensity — Live</div>
+          <div class="hc-val w" id="warScoreVal">25<span style="font-size:28px;font-weight:400;color:var(--t3)">/100</span></div>
+          <div style="font-size:12px;color:var(--t2);margin-top:8px">Active conflict · de-escalation phase</div>
+          <div class="intensity-bar-wrap">
+            <div class="intensity-bar-labels">
+              <span>CEASEFIRE</span>
+              <span>CURRENT</span>
+              <span>FULL WAR</span>
+            </div>
+            <div class="intensity-bar-track">
+              <div class="intensity-bar-fill" id="intensityFill" style="width:25%"></div>
+              <div class="intensity-bar-marker" id="intensityMarker" style="left:25%"></div>
+            </div>
+          </div>
+          <div class="hc-badge dn" id="warScoreBadge" style="margin-top:14px">↓ −70pts from peak 95 on Feb 28</div>
         </div>
+
+        <div class="hero-divider"></div>
+
+        <!-- Col 2: De-escalation countdown -->
+        <div class="hero-col center" style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <div class="hc-lbl" style="text-align:center">De-escalation window</div>
+          <div class="cdb-num" id="countdownNum">26</div>
+          <div class="cdb-unit">days remaining</div>
+          <div class="cdb-deadline">deadline · Apr 19, 2026</div>
+          <div class="cdb-what">If Islamabad talks reach framework agreement by deadline, ceasefire becomes likely within 10 days</div>
+        </div>
+
+        <div class="hero-divider"></div>
+
+        <!-- Col 3: Key signals -->
+        <div class="hero-col right">
+          <div class="hc-lbl">Key Signals Now</div>
+          <div class="signal-row">
+            <div class="signal-label">Diplomacy</div>
+            <div class="signal-val" style="color:var(--green)">Talks Active</div>
+            <div class="signal-meta">Vance + Witkoff in Islamabad</div>
+          </div>
+          <div class="signal-row">
+            <div class="signal-label">Hormuz Strait</div>
+            <div class="signal-val" style="color:var(--yellow)">Restricted</div>
+            <div class="signal-meta">Partial tanker passage</div>
+          </div>
+          <div class="signal-row">
+            <div class="signal-label">Brent Crude</div>
+            <div class="signal-val" style="color:var(--green)">~$99</div>
+            <div class="signal-meta">↓ from $112 peak</div>
+          </div>
+          <div class="signal-row">
+            <div class="signal-label">Strike Activity</div>
+            <div class="signal-val" style="color:var(--orange)">Low</div>
+            <div class="signal-meta">8% of opening-day volume</div>
+          </div>
+        </div>
+
       </div>
-      <div class="hc-sub" id="warScoreSub">Vance + Witkoff + Kushner heading to Islamabad. Closest to formal talks since war began Feb 28.</div>
-      <div class="hc-badge dn" id="warScoreBadge">↓ −70pts from peak 95 on Feb 28</div>
+      <div class="hero-bottom-bar">
+        <div class="hc-sub" id="warScoreSub">Vance + Witkoff + Kushner heading to Islamabad. Closest to formal talks since war began Feb 28. 5-day power plant pause now Day 2.</div>
+      </div>
     </div>
   </div>
 
-  <!-- ╔═ STAT STRIP — Iran war focused ═══════════════════════╗ -->
+  <!-- ╔═ STAT STRIP ═══════════════════════════════════════════╗ -->
   <div class="stats">
     <div class="stat"><div class="stat-n">War Start</div><div class="stat-v c-red">Feb 28</div></div>
     <div class="stat"><div class="stat-n">Days Active</div><div class="stat-v c-or">25</div></div>
@@ -548,6 +734,89 @@ body::after{
     <div class="stat"><div class="stat-n">US Strikes on Iran</div><div class="stat-v c-red">72+ sites</div></div>
     <div class="stat"><div class="stat-n">Hormuz Strait</div><div class="stat-v c-yl">Restricted</div></div>
     <div class="stat"><div class="stat-n">Brent Crude</div><div class="stat-v c-gr">~$99</div></div>
+  </div>
+
+  <!-- ╔═ REGIONAL ESCALATION ══════════════════════════════════╗ -->
+  <div class="sec">
+    <div class="sec-hdr">
+      <span class="sec-title">Regional Escalation — Attacks on Neighbouring Countries</span>
+      <span class="sec-meta">Since Feb 28, 2026 · ballistic missiles + drones + cruise</span>
+    </div>
+    <div class="regional-grid">
+
+      <div class="rg-cell">
+        <div class="rg-country">Iraq</div>
+        <div class="rg-role">US CENTCOM HQ · Ain al-Assad · Erbil</div>
+        <div class="rg-row"><span class="rg-key">Today</span><span class="rg-val c-or">4 BMs · 12 UAVs</span></div>
+        <div class="rg-row"><span class="rg-key">All-time</span><span class="rg-val c-red">156 BMs · 445 UAVs</span></div>
+        <div class="rg-total">
+          <span class="rg-total-lbl">Total projectiles</span>
+          <span class="rg-total-val c-red">601</span>
+        </div>
+        <div><span class="rg-status hot">ACTIVE TARGET</span></div>
+      </div>
+
+      <div class="rg-cell">
+        <div class="rg-country">Saudi Arabia</div>
+        <div class="rg-role">Riyadh · Aramco · Abha airport</div>
+        <div class="rg-row"><span class="rg-key">Today</span><span class="rg-val c-yl">0 BMs · 3 UAVs</span></div>
+        <div class="rg-row"><span class="rg-key">All-time</span><span class="rg-val c-or">28 BMs · 89 UAVs</span></div>
+        <div class="rg-total">
+          <span class="rg-total-lbl">Total projectiles</span>
+          <span class="rg-total-val c-or">117</span>
+        </div>
+        <div><span class="rg-status warm">ELEVATED</span></div>
+      </div>
+
+      <div class="rg-cell">
+        <div class="rg-country">Qatar</div>
+        <div class="rg-role">Al Udeid Air Base · US Air Force hub</div>
+        <div class="rg-row"><span class="rg-key">Today</span><span class="rg-val c-gr">0 BMs · 0 UAVs</span></div>
+        <div class="rg-row"><span class="rg-key">All-time</span><span class="rg-val c-yl">14 BMs · 45 UAVs</span></div>
+        <div class="rg-total">
+          <span class="rg-total-lbl">Total projectiles</span>
+          <span class="rg-total-val c-yl">59</span>
+        </div>
+        <div><span class="rg-status watch">WATCH</span></div>
+      </div>
+
+      <div class="rg-cell">
+        <div class="rg-country">Bahrain</div>
+        <div class="rg-role">US 5th Fleet HQ · NSA Bahrain</div>
+        <div class="rg-row"><span class="rg-key">Today</span><span class="rg-val c-gr">0 BMs · 1 UAV</span></div>
+        <div class="rg-row"><span class="rg-key">All-time</span><span class="rg-val c-yl">19 BMs · 67 UAVs</span></div>
+        <div class="rg-total">
+          <span class="rg-total-lbl">Total projectiles</span>
+          <span class="rg-total-val c-yl">86</span>
+        </div>
+        <div><span class="rg-status watch">WATCH</span></div>
+      </div>
+
+      <div class="rg-cell">
+        <div class="rg-country">Kuwait</div>
+        <div class="rg-role">Camp Arifjan · Ali Al Salem Air Base</div>
+        <div class="rg-row"><span class="rg-key">Today</span><span class="rg-val c-gr">0 BMs · 0 UAVs</span></div>
+        <div class="rg-row"><span class="rg-key">All-time</span><span class="rg-val c-yl">8 BMs · 23 UAVs</span></div>
+        <div class="rg-total">
+          <span class="rg-total-lbl">Total projectiles</span>
+          <span class="rg-total-val c-yl">31</span>
+        </div>
+        <div><span class="rg-status low">LOW</span></div>
+      </div>
+
+      <div class="rg-cell">
+        <div class="rg-country">Jordan</div>
+        <div class="rg-role">Tower 22 · US special forces bases</div>
+        <div class="rg-row"><span class="rg-key">Today</span><span class="rg-val c-gr">0 BMs · 0 UAVs</span></div>
+        <div class="rg-row"><span class="rg-key">All-time</span><span class="rg-val c-yl">12 BMs · 34 UAVs</span></div>
+        <div class="rg-total">
+          <span class="rg-total-lbl">Total projectiles</span>
+          <span class="rg-total-val c-yl">46</span>
+        </div>
+        <div><span class="rg-status low">LOW</span></div>
+      </div>
+
+    </div>
   </div>
 
   <!-- ╔═ WAR INTENSITY CHART ═══════════════════════════════════╗ -->
@@ -1622,11 +1891,13 @@ function toggleMethod(btn){
 
 /* ═══════════════════════════════════════════════════════════════
    LIVE SCORES — driven by news sentiment, updates every 5s
-   No paid API needed. Scores drift with incoming headlines.
 ═══════════════════════════════════════════════════════════════ */
-let liveAbuProb=42;   // baseline from historical data
-let liveWarScore=25;  // baseline from historical data
+let liveAbuProb=42;
+let liveWarScore=25;
 let prevAbu=42, prevWar=25;
+
+// Deadline: Apr 19, 2026
+const DEADLINE=new Date('2026-04-19T00:00:00Z');
 
 function animateValue(el,newText){
   el.classList.remove('flash');
@@ -1635,15 +1906,31 @@ function animateValue(el,newText){
   el.innerHTML=newText;
 }
 
+function updateDeadlineCountdown(){
+  const now=new Date();
+  const msLeft=DEADLINE-now;
+  const daysLeft=Math.max(0,Math.ceil(msLeft/(1000*60*60*24)));
+  const el=document.getElementById('deadlineDays');
+  const cn=document.getElementById('countdownNum');
+  if(el)el.textContent=daysLeft;
+  if(cn)cn.textContent=daysLeft;
+  // Change color urgency as deadline approaches
+  const color=daysLeft>20?'var(--orange)':daysLeft>10?'var(--yellow)':'var(--red)';
+  if(el)el.style.color=color;
+  if(cn)cn.style.color=color;
+}
+
+function updateIntensityBar(score){
+  const pct=Math.max(2,Math.min(98,score));
+  const fill=document.getElementById('intensityFill');
+  const marker=document.getElementById('intensityMarker');
+  if(fill)fill.style.width=`${pct}%`;
+  if(marker)marker.style.left=`${pct}%`;
+}
+
 function updateLiveScores(){
-  // Sentiment-driven delta: smoothedSent is -10 (escalating) → +10 (de-escalating)
-  // Escalating news → scores creep up. De-escalating → creep down.
-  const sentimentPush=-smoothedSent*0.08; // negative sentiment = escalating = push up
-
-  // Micro-noise: small random walk ±0.4 to feel alive
+  const sentimentPush=-smoothedSent*0.08;
   const noise=(Math.random()-0.48)*0.8;
-
-  // Apply delta with dampening (scores revert toward baseline slowly)
   const abuRevert=(42-liveAbuProb)*0.004;
   const warRevert=(25-liveWarScore)*0.003;
 
@@ -1653,44 +1940,40 @@ function updateLiveScores(){
   const abuRnd=Math.round(liveAbuProb);
   const warRnd=Math.round(liveWarScore);
 
-  // ── Update hero card: Abu Dhabi prob ────────────────────
-  const abuEl=document.getElementById('abuProbVal');
-  if(abuEl){
-    animateValue(abuEl,`${abuRnd}%`);
-  }
-  const abuBadge=document.getElementById('abuProbBadge');
-  if(abuBadge){
-    const diff=abuRnd-prevAbu;
-    const sign=diff>0?`↑ +${diff}pp`:diff<0?`↓ ${diff}pp`:`→ no change`;
-    const cls=diff>0?'up':'dn';
-    abuBadge.className=`hc-badge ${cls}`;
-    abuBadge.textContent=`${sign} in last 5 min · LIVE`;
-  }
-
-  // ── Update hero card: War score ─────────────────────────
+  // ── War score + intensity bar ────────────────────────────
   const warEl=document.getElementById('warScoreVal');
-  if(warEl){
-    animateValue(warEl,`${warRnd}<span style="font-size:26px;font-weight:400;color:var(--t3)">/100</span>`);
-  }
+  if(warEl) animateValue(warEl,`${warRnd}<span style="font-size:28px;font-weight:400;color:var(--t3)">/100</span>`);
+  updateIntensityBar(warRnd);
   const warBadge=document.getElementById('warScoreBadge');
   if(warBadge){
     const diff=warRnd-prevWar;
-    const sign=diff>0?`↑ +${diff}pts`:diff<0?`↓ ${diff}pts`:`→ no change`;
-    const cls=diff>0?'up':'dn';
-    warBadge.className=`hc-badge ${cls}`;
+    const sign=diff>0?`↑ +${diff}pts`:diff<0?`↓ ${diff}pts`:`→ stable`;
+    warBadge.className=`hc-badge ${diff>0?'up':'dn'}`;
     warBadge.textContent=`${sign} in last 5 min · LIVE`;
   }
 
-  // Update sub-text with most recent relevant headline
-  const latestHeadline=articlePool.find(a=>isRelevant(a.title,''));
-  if(latestHeadline){
-    const abuSub=document.getElementById('abuProbSub');
-    const warSub=document.getElementById('warScoreSub');
-    if(abuSub)abuSub.textContent=latestHeadline.title;
-    if(warSub)warSub.textContent=latestHeadline.title;
+  // ── Abu Dhabi (secondary) ────────────────────────────────
+  const abuEl=document.getElementById('abuProbVal');
+  if(abuEl) animateValue(abuEl,`${abuRnd}%`);
+  const abuBadge=document.getElementById('abuProbBadge');
+  if(abuBadge){
+    const diff=abuRnd-prevAbu;
+    const sign=diff>0?`↑ +${diff}pp`:diff<0?`↓ ${diff}pp`:`→ stable`;
+    abuBadge.className=`hc-badge ${diff>0?'up':'dn'}`;
+    abuBadge.textContent=`${sign} in last 5 min · LIVE`;
+  }
+
+  // ── Latest headline in subtext ───────────────────────────
+  const latest=articlePool.find(a=>isRelevant(a.title,''));
+  if(latest){
+    const ws=document.getElementById('warScoreSub');
+    const as=document.getElementById('abuProbSub');
+    if(ws)ws.textContent=latest.title;
+    if(as)as.textContent=latest.title;
   }
 
   prevAbu=abuRnd; prevWar=warRnd;
+  updateDeadlineCountdown();
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1707,7 +1990,9 @@ setInterval(tick, 1000); // clock ticks every second
 fetchAllSourcesParallel();
 setInterval(fetchNextSource, 15*1000);
 
-// Live score update every 5 seconds
+// Live score + countdown update every 5 seconds
+updateDeadlineCountdown();
+updateIntensityBar(25);
 setInterval(updateLiveScores, 5000);
 
 const now=new Date();
