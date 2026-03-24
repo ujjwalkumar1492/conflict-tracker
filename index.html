@@ -444,6 +444,29 @@ body::after{
 .t-row.live-new{animation:rowIn .4s ease;border-left:2px solid rgba(129,140,248,.4)}
 @keyframes rowIn{from{opacity:0;background:rgba(129,140,248,.05)}to{opacity:1;background:transparent}}
 
+/* AI update badge + number flash */
+.ai-badge{
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;
+  padding:2px 8px;border-radius:100px;cursor:pointer;border:none;
+  background:rgba(129,140,248,.12);color:var(--indigo);
+  border:1px solid rgba(129,140,248,.25);transition:all .15s;
+}
+.ai-badge:hover{background:rgba(129,140,248,.22)}
+.ai-badge.loading{animation:aipulse 1.2s ease-in-out infinite}
+@keyframes aipulse{0%,100%{opacity:1}50%{opacity:.4}}
+.ai-badge.ok{background:rgba(74,222,128,.1);color:var(--green);border-color:rgba(74,222,128,.25)}
+.ai-badge.err{background:rgba(240,82,82,.1);color:var(--red);border-color:rgba(240,82,82,.25)}
+.hc-val.flash{animation:numflash .6s ease}
+@keyframes numflash{0%{opacity:.3;transform:scale(.97)}100%{opacity:1;transform:scale(1)}}
+.ai-row{border-left:2px solid rgba(129,140,248,.6)!important;background:rgba(129,140,248,.04)!important}
+.ai-row .t-time{color:var(--indigo)!important}
+.ai-src-tag{
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;
+  padding:1px 6px;border-radius:100px;margin-top:6px;
+  background:rgba(129,140,248,.1);color:var(--indigo);border:1px solid rgba(129,140,248,.2);
+}
+
 /* ── RESPONSIVE ────────────────────────────────────────────── */
 @media(max-width:860px){
   .hero{grid-template-columns:1fr}
@@ -479,6 +502,7 @@ body::after{
   <div class="topbar-r">
     <span class="ts" id="liveClock">—</span>
     <span class="ts" id="tsText" style="margin-left:6px"></span>
+    <button class="ai-badge" id="aiBadge" onclick="triggerAIUpdate()" title="Fetch today's AI-powered intelligence update via Perplexity">⬡ AI Update</button>
     <button class="btn" onclick="refreshFeed()">↻ Refresh</button>
   </div>
 </div>
@@ -501,15 +525,15 @@ body::after{
   <div class="hero">
     <div class="hero-card a">
       <div class="hc-lbl">Abu Dhabi Attack Probability — Today</div>
-      <div class="hc-val a">42%</div>
-      <div class="hc-sub">7 BMs + 16 UAVs intercepted overnight. Diplomacy driving risk lower. 5-day pause still in effect.</div>
-      <div class="hc-badge dn">↓ −55pp from peak 97% on Feb 28</div>
+      <div class="hc-val a" id="abuProbVal">42%</div>
+      <div class="hc-sub" id="abuProbSub">7 BMs + 16 UAVs intercepted overnight. Diplomacy driving risk lower. 5-day pause still in effect.</div>
+      <div class="hc-badge dn" id="abuProbBadge">↓ −55pp from peak 97% on Feb 28</div>
     </div>
     <div class="hero-card w">
       <div class="hc-lbl">Iran–US War Intensity Score — Today</div>
-      <div class="hc-val w">25<span style="font-size:26px;font-weight:400;color:var(--t3)">/100</span></div>
-      <div class="hc-sub">Vance + Witkoff + Kushner heading to Islamabad. Closest to formal talks since war began Feb 28.</div>
-      <div class="hc-badge dn">↓ −70pts from peak 95 on Feb 28</div>
+      <div class="hc-val w" id="warScoreVal">25<span style="font-size:26px;font-weight:400;color:var(--t3)">/100</span></div>
+      <div class="hc-sub" id="warScoreSub">Vance + Witkoff + Kushner heading to Islamabad. Closest to formal talks since war began Feb 28.</div>
+      <div class="hc-badge dn" id="warScoreBadge">↓ −70pts from peak 95 on Feb 28</div>
     </div>
   </div>
 
@@ -1453,6 +1477,130 @@ function toggleMethod(btn){
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   PERPLEXITY AI — live intelligence update
+   Calls /api/perplexity (Vercel serverless) → updates scores + today feed
+═══════════════════════════════════════════════════════════════ */
+let aiLastUpdated=null;
+
+function setAIBadge(state,label){
+  const b=document.getElementById('aiBadge');
+  if(!b)return;
+  b.className='ai-badge'+(state?' '+state:'');
+  b.textContent=label;
+}
+
+function animateValue(el,newText){
+  el.classList.remove('flash');
+  void el.offsetWidth; // reflow to restart animation
+  el.classList.add('flash');
+  el.innerHTML=newText;
+}
+
+function applyAIUpdate(data){
+  // ── Hero card: Abu Dhabi probability ──────────────────────
+  const abuEl=document.getElementById('abuProbVal');
+  if(abuEl&&data.abu_prob!=null){
+    const pct=Math.max(0,Math.min(100,Math.round(data.abu_prob)));
+    animateValue(abuEl,`${pct}%`);
+    const sub=document.getElementById('abuProbSub');
+    if(sub&&data.headline)sub.textContent=data.headline;
+    const badge=document.getElementById('abuProbBadge');
+    if(badge){
+      const diff=pct-42; // vs hardcoded baseline
+      const sign=diff>0?`↑ +${diff}pp`:`↓ ${diff}pp`;
+      const cls=diff>0?'up':'dn';
+      badge.className=`hc-badge ${cls}`;
+      badge.textContent=`${sign} vs yesterday's baseline · AI`;
+    }
+  }
+
+  // ── Hero card: War intensity score ────────────────────────
+  const warEl=document.getElementById('warScoreVal');
+  if(warEl&&data.war_score!=null){
+    const sc=Math.max(0,Math.min(100,Math.round(data.war_score)));
+    animateValue(warEl,`${sc}<span style="font-size:26px;font-weight:400;color:var(--t3)">/100</span>`);
+    const sub=document.getElementById('warScoreSub');
+    if(sub&&data.headline)sub.textContent=data.headline;
+    const badge=document.getElementById('warScoreBadge');
+    if(badge){
+      const diff=sc-25;
+      const sign=diff>0?`↑ +${diff}pts`:`↓ ${diff}pts`;
+      const cls=diff>0?'up':'dn';
+      badge.className=`hc-badge ${cls}`;
+      badge.textContent=`${sign} vs yesterday's baseline · AI`;
+    }
+  }
+
+  // ── Sentiment meter nudge ─────────────────────────────────
+  if(data.sentiment==='de-escalating') smoothedSent=Math.min(10,smoothedSent+3);
+  else if(data.sentiment==='escalating') smoothedSent=Math.max(-10,smoothedSent-3);
+  updateSentMeter();
+
+  // ── Inject AI events into today's feed ───────────────────
+  const feed=document.getElementById('todayFeed');
+  if(feed&&Array.isArray(data.events)&&data.events.length>0){
+    // Insert a divider first
+    const divider=document.createElement('div');
+    divider.style.cssText='padding:8px 18px 6px;font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--indigo);letter-spacing:.12em;border-bottom:1px solid rgba(129,140,248,.15);display:flex;align-items:center;gap:8px';
+    divider.innerHTML=`<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--indigo)"></span> PERPLEXITY AI · LIVE INTELLIGENCE UPDATE · ${new Date().toLocaleTimeString()}`;
+    feed.insertBefore(divider,feed.firstChild);
+
+    // Insert events newest-first
+    [...data.events].forEach(ev=>{
+      const row=document.createElement('div');
+      row.className='t-row ai-row';
+      const tagLabel=(ev.tag||'intel').toUpperCase();
+      const srcHtml=data.sources&&data.sources.length?
+        `<div class="ai-src-tag">⬡ ${esc(data.sources.slice(0,2).join(' · '))}</div>`:'';
+      row.innerHTML=`
+        <div class="t-time">${esc(ev.time||'—')}</div>
+        <div class="t-tag-cell"><span class="tag ${esc(ev.tag||'intel')}">${tagLabel}</span></div>
+        <div class="t-content">
+          <div class="t-hl">${esc(ev.hl||'')}</div>
+          <div class="t-detail">${esc(ev.det||'')}${srcHtml}</div>
+        </div>`;
+      feed.insertBefore(row,divider.nextSibling);
+    });
+  }
+
+  aiLastUpdated=new Date();
+  setAIBadge('ok',`⬡ AI · ${aiLastUpdated.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`);
+}
+
+async function triggerAIUpdate(){
+  setAIBadge('loading','⬡ Thinking...');
+  try{
+    const r=await fetch('/api/perplexity',{signal:AbortSignal.timeout(30000)});
+    const j=await r.json();
+    if(!r.ok||!j.ok){
+      const msg=j.error||`HTTP ${r.status}`;
+      setAIBadge('err','⬡ AI Error');
+      // If running locally show helpful message
+      if(msg.includes('not set')||r.status===503){
+        const init=document.getElementById('ltermInit');
+        if(init)init.innerHTML=`<div style="color:var(--indigo);font-family:'JetBrains Mono',monospace;font-size:11px">⬡ Add PERPLEXITY_KEY to Vercel env vars to enable AI updates.<br><br>See setup instructions below.</div>`;
+      }
+      console.warn('AI update failed:',msg);
+      return;
+    }
+    applyAIUpdate(j.data);
+  }catch(e){
+    const isLocal=window.location.protocol==='file:'||window.location.hostname==='localhost';
+    setAIBadge('err', isLocal?'⬡ Local only':'⬡ AI Failed');
+    if(isLocal){
+      const init=document.getElementById('ltermInit');
+      if(!document.querySelector('.ai-local-note')&&init){
+        const note=document.createElement('div');
+        note.className='ai-local-note';
+        note.style.cssText='padding:14px 18px;font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--t3);border-top:1px solid var(--b1)';
+        note.innerHTML=`<span style="color:var(--indigo)">⬡ AI updates require Vercel deployment.</span><br>Deploy to Vercel → add PERPLEXITY_KEY env var → AI updates work automatically.`;
+        document.getElementById('todayFeed').parentElement.appendChild(note);
+      }
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════════════════════ */
 buildToday();
@@ -1463,6 +1611,11 @@ fetchNews();
 tick();
 setInterval(tick, 30000);
 setInterval(fetchNews, 2*60*1000);
+
+// Auto-trigger AI update on load (works on Vercel, gracefully fails locally)
+triggerAIUpdate();
+// Re-fetch AI update every 30 minutes
+setInterval(triggerAIUpdate, 30*60*1000);
 
 const now=new Date();
 document.getElementById('tsText').textContent=`Updated: ${now.toLocaleTimeString()}`;
