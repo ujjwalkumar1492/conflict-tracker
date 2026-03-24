@@ -292,6 +292,89 @@ svg.ch{width:100%;height:160px;display:block}
 .explainer .t-block{background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);padding:10px;font-size:11px}
 .explainer .t-block strong{display:block;color:var(--t1);margin-bottom:4px;font-size:12px}
 
+/* ── LIVE SENTIMENT TERMINAL ───────────────────────────────── */
+.lterm-wrap{background:var(--bg);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:32px}
+.sent-hdr{
+  background:var(--s2);border-bottom:1px solid var(--b1);
+  padding:14px 20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+}
+.sent-label-group{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.sent-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--t3)}
+.sent-val{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;transition:color .5s;letter-spacing:.04em}
+.sent-track-wrap{flex:1;min-width:180px;display:flex;align-items:center;gap:8px}
+.sent-edge{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);flex-shrink:0}
+.sent-edge.neg{color:rgba(240,82,82,.6)}
+.sent-edge.pos{color:rgba(74,222,128,.6)}
+.sent-track{flex:1;position:relative;height:4px;background:linear-gradient(to right,rgba(240,82,82,.5),var(--b3) 50%,rgba(74,222,128,.5));border-radius:2px}
+.sent-needle{position:absolute;top:-6px;width:3px;height:16px;background:var(--t1);border-radius:2px;transform:translateX(-50%);transition:left .7s cubic-bezier(.4,0,.2,1);box-shadow:0 0 6px rgba(255,255,255,.3)}
+.sent-counts{display:flex;gap:14px;font-family:'JetBrains Mono',monospace;font-size:10px;flex-shrink:0}
+.sc-neg{color:var(--red)}.sc-pos{color:var(--green)}
+
+.lterm-body{
+  height:340px;overflow-y:auto;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+}
+.lterm-body::-webkit-scrollbar{width:3px}
+.lterm-body::-webkit-scrollbar-thumb{background:var(--b2)}
+
+.tl-line{
+  display:grid;grid-template-columns:62px 20px 82px 1fr 110px;
+  gap:8px;padding:7px 18px;
+  border-bottom:1px solid rgba(255,255,255,.025);
+  border-left:2px solid transparent;
+  transition:background .1s;
+  animation:slideIn .3s ease;
+  cursor:default;
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.tl-line:hover{background:rgba(255,255,255,.02)}
+.tl-line.neg{border-left-color:rgba(240,82,82,.35)}
+.tl-line.pos{border-left-color:rgba(74,222,128,.28)}
+.tl-ts{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);letter-spacing:.03em;align-self:center}
+.tl-icon{font-size:11px;align-self:center;text-align:center}
+.tl-icon.neg{color:var(--red)}.tl-icon.pos{color:var(--green)}.tl-icon.neut{color:var(--t3)}
+.tl-ctag{
+  font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.06em;
+  padding:2px 6px;border-radius:100px;align-self:center;white-space:nowrap;
+}
+.tl-ctag.neg{background:rgba(240,82,82,.1);color:var(--red);border:1px solid rgba(240,82,82,.2)}
+.tl-ctag.pos{background:rgba(74,222,128,.08);color:var(--green);border:1px solid rgba(74,222,128,.18)}
+.tl-ctag.neut{background:rgba(255,255,255,.03);color:var(--t3);border:1px solid var(--b1)}
+.tl-text{
+  font-size:12px;color:var(--t1);line-height:1.35;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;align-self:center;
+}
+.tl-src{
+  font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--indigo);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;align-self:center;text-align:right;
+}
+
+.lterm-init{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t3);gap:8px;flex-direction:column;
+}
+.cursor-blink{display:inline-block;width:8px;height:14px;background:var(--t3);animation:blink 1.1s step-end infinite;vertical-align:middle}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+.lterm-statusbar{
+  background:var(--s2);border-top:1px solid var(--b1);
+  padding:6px 18px;display:flex;align-items:center;justify-content:space-between;
+  font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);
+}
+.lterm-statusbar .sdot{
+  display:inline-block;width:5px;height:5px;border-radius:50%;
+  background:var(--green);margin-right:6px;vertical-align:middle;
+  animation:pulse 2s ease-in-out infinite;
+}
+.lterm-statusbar .sdot.idle{background:var(--t3);animation:none}
+.lterm-art-list{border-top:1px solid var(--b1)}
+.art-item{padding:10px 18px;border-bottom:1px solid rgba(255,255,255,.03);cursor:pointer;transition:background .1s;display:flex;align-items:baseline;gap:10px}
+.art-item:last-child{border-bottom:none}
+.art-item:hover{background:var(--s1)}
+.art-ttl{font-size:12px;color:var(--t2);flex:1;line-height:1.4}
+.art-src{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--indigo);flex-shrink:0}
+
 /* ── RESPONSIVE ────────────────────────────────────────────── */
 @media(max-width:860px){
   .hero{grid-template-columns:1fr}
@@ -412,20 +495,55 @@ svg.ch{width:100%;height:160px;display:block}
     </div>
   </div>
 
-  <!-- ╔═ LIVE NEWS FEED ════════════════════════════════════════╗ -->
+  <!-- ╔═ LIVE SENTIMENT TERMINAL ═══════════════════════════════╗ -->
   <div style="margin-bottom:32px">
     <div class="sh">
-      <div class="sh-t"><div class="dot"></div> Live News Feed <span class="badge live">Auto-refresh 5min</span></div>
-      <div class="sh-m" id="feedTs">via GDELT Global News API</div>
+      <div class="sh-t"><div class="dot"></div> Live Intel Terminal <span class="badge live">Sentiment Analysis</span></div>
+      <div class="sh-m" id="feedTs">Streaming via GDELT · auto-refresh 5min</div>
     </div>
-    <div class="feed-wrap">
-      <div class="feed-hdr">
-        <div class="sh-t" style="font-size:11px">Recent Headlines · Iran · UAE · Middle East</div>
-        <button class="btn" onclick="refreshFeed()">↻ Refresh</button>
+    <div class="lterm-wrap">
+
+      <!-- Sentiment Meter -->
+      <div class="sent-hdr">
+        <div class="sent-label-group">
+          <span class="sent-label">Sentiment</span>
+          <span class="sent-val" id="sentVal">—</span>
+        </div>
+        <div class="sent-track-wrap">
+          <span class="sent-edge neg">ESCALATION</span>
+          <div class="sent-track">
+            <div class="sent-needle" id="sentNeedle" style="left:50%"></div>
+          </div>
+          <span class="sent-edge pos">DE-ESCALATION</span>
+        </div>
+        <div class="sent-counts">
+          <span class="sc-neg" id="scNeg">0 escalation</span>
+          <span class="sc-pos" id="scPos">0 de-escalation</span>
+        </div>
       </div>
-      <div id="newsFeed"><div class="feed-loading"><div class="spinner"></div>Fetching live headlines from GDELT...</div></div>
+
+      <!-- Terminal body — headlines stream in here -->
+      <div class="lterm-body" id="liveTerminal">
+        <div class="lterm-init" id="ltermInit">
+          <div><span class="cursor-blink"></span> Connecting to GDELT news stream...</div>
+          <div style="font-size:10px;margin-top:4px;color:var(--t3)">Headlines will stream in after fetch completes</div>
+        </div>
+      </div>
+
+      <!-- Article list (compact, below terminal) -->
+      <div class="lterm-art-list" id="artList"></div>
+
+      <!-- Status bar -->
+      <div class="lterm-statusbar">
+        <span><span class="sdot idle" id="termDot"></span><span id="termStatus">INITIALIZING</span></span>
+        <span id="termCount">0 headlines</span>
+        <button class="btn" onclick="refreshFeed()" style="padding:2px 10px;font-size:10px">↻ REFRESH</button>
+      </div>
     </div>
   </div>
+
+  <!-- Hidden div kept for fetchNews compat -->
+  <div id="newsFeed" style="display:none"></div>
 
   <!-- ╔═ LIVE DATA EXPLAINER ═══════════════════════════════════╗ -->
   <div class="explainer" style="margin-bottom:32px">
@@ -1010,6 +1128,118 @@ function renderCombined(el,item){
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   SENTIMENT ANALYSIS ENGINE
+═══════════════════════════════════════════════════════════════ */
+const ESC_WORDS=[
+  'strike','attack','missile','bomb','kill','killed','war','retaliat',
+  'threat','ultimatum','escalat','launch','destroy','weapon','clash',
+  'offensive','hostile','intercept','drone','barrage','fire','casualt',
+  'explosion','assassination','siege','blockade','troops','deployment'
+];
+const DEESC_WORDS=[
+  'ceasefire','cease-fire','talk','deal','peace','pause','diplomati',
+  'agreement','negotiat','de-escalat','resolution','withdraw','mediat',
+  'truce','humanitarian','dialogue','accord','reconcil','sanction lift',
+  'meeting','envoy','progress','breakthrough','hope','reduce','calm'
+];
+
+function analyzeSentiment(text){
+  const t=text.toLowerCase();
+  let score=0;
+  ESC_WORDS.forEach(w=>{if(t.includes(w))score-=1});
+  DEESC_WORDS.forEach(w=>{if(t.includes(w))score+=1.5});
+  return Math.max(-10,Math.min(10,score));
+}
+
+/* ── Terminal State ─ */
+let termQueue=[];
+let termTicker=null;
+let termLineCount=0;
+let negCount=0,posCount=0;
+let smoothedSent=0; // -10 → +10
+
+function updateSentMeter(){
+  const pct=((smoothedSent+10)/20)*100; // 0-100, 50=neutral
+  document.getElementById('sentNeedle').style.left=`${Math.max(2,Math.min(98,pct))}%`;
+  const label=smoothedSent>2?'DE-ESCALATING':smoothedSent<-2?'ESCALATING':'MIXED / NEUTRAL';
+  const color=smoothedSent>2?'#4ade80':smoothedSent<-2?'#f05252':'#facc15';
+  const sv=document.getElementById('sentVal');
+  sv.textContent=label;sv.style.color=color;
+  document.getElementById('scNeg').textContent=`${negCount} escalation`;
+  document.getElementById('scPos').textContent=`${posCount} de-escalation`;
+}
+
+function addTermLine(headline,score,source,url){
+  const terminal=document.getElementById('liveTerminal');
+  // Remove init message
+  const init=document.getElementById('ltermInit');
+  if(init)init.remove();
+
+  const cls=score>0.5?'pos':score<-0.5?'neg':'neut';
+  const icon=score>0.5?'↓':score<-0.5?'↑':'·';
+  const tag=score>0.5?'DE-ESCAL':score<-0.5?'ESCALAT':'NEUTRAL';
+
+  // Update counts
+  if(score>0.5)posCount++;else if(score<-0.5)negCount++;
+
+  // Smooth the overall sentiment (exponential moving average)
+  smoothedSent=smoothedSent*0.88+(score*0.12);
+  updateSentMeter();
+
+  // Get AST time
+  const ast=new Date(new Date().getTime()+(4*3600000));
+  const ts=ast.toISOString().slice(11,19);
+
+  const line=document.createElement('div');
+  line.className=`tl-line ${cls}`;
+  if(url)line.onclick=()=>window.open(url,'_blank','noopener');
+  if(url)line.style.cursor='pointer';
+  line.innerHTML=`
+    <span class="tl-ts">${ts}</span>
+    <span class="tl-icon ${cls}">${icon}</span>
+    <span class="tl-ctag ${cls}">${tag}</span>
+    <span class="tl-text" title="${esc(headline)}">${esc(headline)}</span>
+    <span class="tl-src">${esc(source)}</span>`;
+
+  // Prepend (newest on top)
+  terminal.insertBefore(line,terminal.firstChild);
+  termLineCount++;
+  document.getElementById('termCount').textContent=`${termLineCount} headlines`;
+
+  // Prune old lines beyond 80
+  const all=terminal.querySelectorAll('.tl-line');
+  if(all.length>80)all[all.length-1].remove();
+}
+
+function startTerminalStream(articles){
+  if(termTicker)clearInterval(termTicker);
+  termQueue=[...articles];
+  let idx=0;
+
+  const dot=document.getElementById('termDot');
+  const stat=document.getElementById('termStatus');
+  dot.classList.remove('idle');
+  stat.textContent='STREAMING';
+
+  const tick=()=>{
+    if(idx>=termQueue.length){
+      clearInterval(termTicker);termTicker=null;
+      dot.classList.add('idle');
+      stat.textContent='IDLE — WAITING FOR REFRESH';
+      return;
+    }
+    const a=termQueue[idx++];
+    const score=analyzeSentiment((a.title||'')+(a.seendate||''));
+    const domain=a.domain||getDomain(a.url||'');
+    addTermLine(a.title||'Untitled',score,domain,a.url||null);
+  };
+
+  // First immediately, then every 3s
+  tick();
+  termTicker=setInterval(tick,3000);
+}
+
+/* ═══════════════════════════════════════════════════════════════
    LIVE GDELT NEWS FEED
 ═══════════════════════════════════════════════════════════════ */
 const QUERIES=[
@@ -1034,35 +1264,34 @@ async function fetchNews(){
     ts.textContent=`Last updated ${timeStr} via GDELT`;
     document.getElementById('tsText').textContent=`Updated: ${timeStr}`;
     if(!j.articles||j.articles.length===0){
-      feed.innerHTML=`<div class="feed-msg">No recent articles found for this query. GDELT may be rate-limiting.<br>Try refreshing in 60s, or click ↻ Refresh to try a different query.</div>`;
+      document.getElementById('termStatus').textContent='NO RESULTS — GDELT RATE LIMITING';
+      document.getElementById('termDot').classList.add('idle');
       return;
     }
-    feed.innerHTML='';
+
+    // Feed the live sentiment terminal (one headline every 3s)
+    startTerminalStream(j.articles);
+
+    // Populate compact article list below terminal
+    const artList=document.getElementById('artList');
+    artList.innerHTML='';
     j.articles.forEach(a=>{
-      const item=document.createElement('div');
-      item.className='news-item';
-      if(a.url)item.onclick=()=>window.open(a.url,'_blank','noopener');
       const domain=a.domain||getDomain(a.url||'');
       const pub=a.seendate?fmtDate(a.seendate):'Recent';
-      item.innerHTML=`
-        <div class="news-title">${esc(a.title||'Untitled article')}</div>
-        <div class="news-meta">
-          <span class="news-src">${esc(domain)}</span>
-          <span>${pub}</span>
-          ${a.url?`<span style="color:var(--indigo)">↗ Open</span>`:''}
-        </div>`;
-      feed.appendChild(item);
+      const item=document.createElement('div');
+      item.className='art-item';
+      if(a.url)item.onclick=()=>window.open(a.url,'_blank','noopener');
+      item.innerHTML=`<span class="art-ttl">${esc(a.title||'Untitled')}</span><span class="art-src">${esc(domain)} · ${pub}</span>`;
+      artList.appendChild(item);
     });
   } catch(e){
     const isTimeout=e.name==='TimeoutError';
-    feed.innerHTML=`<div class="feed-msg">
-      ${isTimeout?'Request timed out — GDELT API is slow. Try refreshing in a moment.':
-        `Live feed unavailable: <code style="font-family:'JetBrains Mono',monospace;color:var(--indigo)">${esc(e.message)}</code>`}
-      <br><br>
-      <strong style="color:var(--t1)">Note:</strong> The news feed uses GDELT's free public API.
-      It works best when opened in a browser (not a local file on some systems — try hosting it or using a live server).
-      The historical data above is always available offline.
-    </div>`;
+    const dot=document.getElementById('termDot');
+    dot.classList.add('idle');
+    document.getElementById('termStatus').textContent=isTimeout?'TIMEOUT — RETRY IN 60s':'CONNECTION ERROR';
+    const terminal=document.getElementById('liveTerminal');
+    const init=document.getElementById('ltermInit');
+    if(init)init.innerHTML=`<div>${isTimeout?'Request timed out — GDELT API is slow.':'Connection error: '+esc(e.message)}</div><div style="font-size:10px;margin-top:6px;color:var(--t3)">Works best on a hosted URL (Vercel/GitHub Pages), not a local file.</div>`;
   }
 }
 
@@ -1074,7 +1303,15 @@ function fmtDate(s){
 }
 
 function refreshFeed(){
-  document.getElementById('newsFeed').innerHTML='<div class="feed-loading"><div class="spinner"></div>Fetching headlines...</div>';
+  // Reset terminal
+  if(termTicker)clearInterval(termTicker);
+  termQueue=[];
+  const terminal=document.getElementById('liveTerminal');
+  terminal.innerHTML=`<div class="lterm-init" id="ltermInit"><div><span class="cursor-blink"></span> Fetching latest headlines...</div></div>`;
+  document.getElementById('artList').innerHTML='';
+  document.getElementById('termDot').classList.remove('idle');
+  document.getElementById('termStatus').textContent='FETCHING';
+  document.getElementById('feedTs').textContent=`Refreshing via GDELT...`;
   fetchNews();
 }
 
