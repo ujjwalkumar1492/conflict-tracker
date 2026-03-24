@@ -1318,18 +1318,23 @@ function startTerminalStream(articles){
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   LIVE NEWS — RSS XML parsed in-browser via allorigins.win proxy
+   LIVE NEWS — RSS XML parsed in-browser via CORS proxy chain
    Works from both file:// (local) and https:// (Vercel) origins
 ═══════════════════════════════════════════════════════════════ */
 
-const PROXY='https://api.allorigins.win/get?url=';
+// Proxy chain — tried in order on failure
+const PROXIES=[
+  url=>`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+  url=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  url=>`https://corsproxy.io/?${encodeURIComponent(url)}`,
+];
 
 const RSS_FEEDS=[
   {name:'Al Jazeera',         url:'https://www.aljazeera.com/xml/rss/all.xml'},
-  {name:'Reuters World',      url:'https://feeds.reuters.com/reuters/worldNews'},
   {name:'BBC Middle East',    url:'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml'},
   {name:'The Guardian World', url:'https://www.theguardian.com/world/rss'},
-  {name:'Sky News World',     url:'https://feeds.skynews.com/feeds/rss/world.xml'},
+  {name:'AP News World',      url:'https://rsshub.app/apnews/world-news'},
+  {name:'Reuters World',      url:'https://feeds.reuters.com/reuters/worldNews'},
 ];
 let rssFeedIdx=0;
 
@@ -1385,13 +1390,29 @@ function onArticlesFetched(articles,source){
   renderArticleList(articles);
 }
 
-async function fetchProxied(targetUrl,timeout=10000){
-  const url=PROXY+encodeURIComponent(targetUrl);
-  const r=await fetch(url,{signal:AbortSignal.timeout(timeout)});
-  if(!r.ok)throw new Error(`proxy ${r.status}`);
-  const j=await r.json();
-  if(!j.contents)throw new Error('empty proxy response');
-  return j.contents;
+async function fetchProxied(targetUrl,timeout=15000){
+  let lastErr;
+  for(let i=0;i<PROXIES.length;i++){
+    try{
+      const proxyUrl=PROXIES[i](targetUrl);
+      const r=await fetch(proxyUrl,{signal:AbortSignal.timeout(timeout)});
+      if(!r.ok)throw new Error(`proxy ${i} HTTP ${r.status}`);
+      const text=await r.text();
+      // allorigins returns JSON wrapper; codetabs/corsproxy return raw content
+      try{
+        const j=JSON.parse(text);
+        if(j.contents)return j.contents; // allorigins format
+        if(typeof j==='object'&&!j.contents)throw new Error('no contents key');
+      }catch(jsonErr){
+        // Not JSON (or no contents key) — treat raw text as the content
+        if(text&&text.length>100)return text;
+        throw new Error(`proxy ${i} empty`);
+      }
+    }catch(e){
+      lastErr=e;
+    }
+  }
+  throw new Error(`all proxies failed: ${lastErr?.message}`);
 }
 
 async function fetchFromRSS(feed){
@@ -1444,7 +1465,7 @@ function fmtDate(s){
 function refreshFeed(){
   if(termTicker)clearInterval(termTicker);
   termQueue=[];
-  document.getElementById('liveTerminal').innerHTML=`<div class="lterm-init" id="ltermInit"><div><span class="cursor-blink"></span> Fetching from NewsAPI...</div></div>`;
+  document.getElementById('liveTerminal').innerHTML=`<div class="lterm-init" id="ltermInit"><div><span class="cursor-blink"></span> Connecting to RSS feeds...</div></div>`;
   document.getElementById('artList').innerHTML='';
   document.getElementById('termDot').classList.remove('idle');
   document.getElementById('termStatus').textContent='FETCHING';
