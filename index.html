@@ -1322,62 +1322,126 @@ function startTerminalStream(articles){
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   LIVE GDELT NEWS FEED
+   LIVE NEWS FEED — NewsAPI primary · GDELT fallback
 ═══════════════════════════════════════════════════════════════ */
-const QUERIES=[
+const NEWSAPI_KEY='cd025c33cb834fe7911791e41a0019ee';
+const NEWSAPI_QUERIES=[
+  'Iran war',
+  'Iran US ceasefire talks',
+  'Abu Dhabi missile attack',
+  'Iran Hormuz oil sanctions',
+  'Iran IRGC strike',
+  'Iran nuclear Pezeshkian',
+  'Iran war Trump Witkoff Islamabad',
+  'Middle East conflict 2026'
+];
+const GDELT_QUERIES=[
   'Iran+US+war+missile+strike',
   'Iran+UAE+Abu+Dhabi+attack',
   'Iran+ceasefire+Islamabad+talks',
   'Iran+Hormuz+oil+sanctions',
   'Operation+Epic+Fury+IRGC',
-  'Iran+nuclear+Pezeshkian+diplomacy',
-  'Middle+East+war+2026+ceasefire',
-  'Iran+war+Trump+Witkoff'
+  'Iran+nuclear+diplomacy',
+  'Middle+East+war+2026',
+  'Iran+Trump+Witkoff'
 ];
 let qIdx=0;
 
+// Normalize NewsAPI article → common shape
+function normalizeNewsAPI(a){
+  return{
+    title: a.title||'',
+    url: a.url||'',
+    domain: a.source?.name||getDomain(a.url||''),
+    seendate: a.publishedAt?a.publishedAt.replace('T',' ').slice(0,16)+' UTC':'',
+    publishedAt: a.publishedAt||''
+  };
+}
+
+// Normalize GDELT article → common shape
+function normalizeGDELT(a){
+  return{
+    title: a.title||'',
+    url: a.url||'',
+    domain: a.domain||getDomain(a.url||''),
+    seendate: a.seendate?fmtDate(a.seendate):'',
+    publishedAt: a.seendate||''
+  };
+}
+
+function renderArticleList(articles){
+  const artList=document.getElementById('artList');
+  artList.innerHTML='';
+  articles.forEach(a=>{
+    const item=document.createElement('div');
+    item.className='art-item';
+    if(a.url)item.onclick=()=>window.open(a.url,'_blank','noopener');
+    item.innerHTML=`<span class="art-ttl">${esc(a.title||'Untitled')}</span><span class="art-src">${esc(a.domain)} · ${esc(a.seendate||'Recent')}</span>`;
+    artList.appendChild(item);
+  });
+}
+
+function onArticlesFetched(articles,source){
+  const now=new Date();
+  const timeStr=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  document.getElementById('feedTs').textContent=`· ${source} · updated ${timeStr}`;
+  document.getElementById('tsText').textContent=timeStr;
+
+  if(!articles||articles.length===0){
+    document.getElementById('termStatus').textContent='NO RESULTS — RETRYING';
+    document.getElementById('termDot').classList.add('idle');
+    return;
+  }
+  startTerminalStream(articles);
+  renderArticleList(articles);
+}
+
+async function fetchFromNewsAPI(q){
+  const url=`https://newsapi.org/v2/everything?q=${encodeURIComponent(q)}&apiKey=${NEWSAPI_KEY}&sortBy=publishedAt&language=en&pageSize=15`;
+  const r=await fetch(url,{signal:AbortSignal.timeout(8000)});
+  if(!r.ok)throw new Error(`NewsAPI HTTP ${r.status}`);
+  const j=await r.json();
+  if(j.status!=='ok')throw new Error(j.message||'NewsAPI error');
+  if(!j.articles||j.articles.length===0)throw new Error('no articles');
+  // Filter out removed articles
+  const valid=j.articles.filter(a=>a.title&&a.title!=='[Removed]');
+  if(valid.length===0)throw new Error('all removed');
+  return valid.map(normalizeNewsAPI);
+}
+
+async function fetchFromGDELT(q){
+  const url=`https://api.gdeltproject.org/api/v2/doc/doc?query=${q}&mode=artlist&maxrecords=10&format=json&sort=DateDesc&timespan=3d`;
+  const r=await fetch(url,{signal:AbortSignal.timeout(9000)});
+  if(!r.ok)throw new Error(`GDELT HTTP ${r.status}`);
+  const j=await r.json();
+  if(!j.articles||j.articles.length===0)throw new Error('no gdelt articles');
+  return j.articles.map(normalizeGDELT);
+}
+
 async function fetchNews(){
-  const feed=document.getElementById('newsFeed');
-  const ts=document.getElementById('feedTs');
-  const q=QUERIES[qIdx%QUERIES.length]; qIdx++;
-  const url=`https://api.gdeltproject.org/api/v2/doc/doc?query=${q}&mode=artlist&maxrecords=8&format=json&sort=DateDesc&timespan=7d`;
+  const i=qIdx%NEWSAPI_QUERIES.length; qIdx++;
+  const naQ=NEWSAPI_QUERIES[i];
+  const gdQ=GDELT_QUERIES[i];
+
+  document.getElementById('termDot').classList.remove('idle');
+  document.getElementById('termStatus').textContent='FETCHING';
+
+  // Try NewsAPI first, fall back to GDELT
   try{
-    const r=await fetch(url,{signal:AbortSignal.timeout(9000)});
-    if(!r.ok)throw new Error(`HTTP ${r.status}`);
-    const j=await r.json();
-    const now=new Date();
-    const timeStr=now.toLocaleTimeString();
-    ts.textContent=`Last updated ${timeStr} via GDELT`;
-    document.getElementById('tsText').textContent=`Updated: ${timeStr}`;
-    if(!j.articles||j.articles.length===0){
-      document.getElementById('termStatus').textContent='NO RESULTS — GDELT RATE LIMITING';
-      document.getElementById('termDot').classList.add('idle');
-      return;
+    const articles=await fetchFromNewsAPI(naQ);
+    onArticlesFetched(articles,'NewsAPI');
+  } catch(e1){
+    try{
+      const articles=await fetchFromGDELT(gdQ);
+      onArticlesFetched(articles,'GDELT');
+    } catch(e2){
+      const dot=document.getElementById('termDot');
+      dot.classList.add('idle');
+      const isTimeout=e2.name==='TimeoutError'||e1.name==='TimeoutError';
+      document.getElementById('termStatus').textContent=isTimeout?'TIMEOUT — RETRY IN 120s':'BOTH SOURCES FAILED';
+      const init=document.getElementById('ltermInit');
+      if(init)init.innerHTML=`<div>NewsAPI: ${esc(e1.message)} · GDELT: ${esc(e2.message)}</div><div style="font-size:10px;margin-top:6px;color:var(--t3)">NewsAPI requires HTTPS — works on Vercel. GDELT works anywhere.</div>`;
     }
-
-    // Feed the live sentiment terminal (one headline every 3s)
-    startTerminalStream(j.articles);
-
-    // Populate compact article list below terminal
-    const artList=document.getElementById('artList');
-    artList.innerHTML='';
-    j.articles.forEach(a=>{
-      const domain=a.domain||getDomain(a.url||'');
-      const pub=a.seendate?fmtDate(a.seendate):'Recent';
-      const item=document.createElement('div');
-      item.className='art-item';
-      if(a.url)item.onclick=()=>window.open(a.url,'_blank','noopener');
-      item.innerHTML=`<span class="art-ttl">${esc(a.title||'Untitled')}</span><span class="art-src">${esc(domain)} · ${pub}</span>`;
-      artList.appendChild(item);
-    });
-  } catch(e){
-    const isTimeout=e.name==='TimeoutError';
-    const dot=document.getElementById('termDot');
-    dot.classList.add('idle');
-    document.getElementById('termStatus').textContent=isTimeout?'TIMEOUT — RETRY IN 60s':'CONNECTION ERROR';
-    const terminal=document.getElementById('liveTerminal');
-    const init=document.getElementById('ltermInit');
-    if(init)init.innerHTML=`<div>${isTimeout?'Request timed out — GDELT API is slow.':'Connection error: '+esc(e.message)}</div><div style="font-size:10px;margin-top:6px;color:var(--t3)">Works best on a hosted URL (Vercel/GitHub Pages), not a local file.</div>`;
   }
 }
 
@@ -1389,15 +1453,13 @@ function fmtDate(s){
 }
 
 function refreshFeed(){
-  // Reset terminal
   if(termTicker)clearInterval(termTicker);
   termQueue=[];
-  const terminal=document.getElementById('liveTerminal');
-  terminal.innerHTML=`<div class="lterm-init" id="ltermInit"><div><span class="cursor-blink"></span> Fetching latest headlines...</div></div>`;
+  document.getElementById('liveTerminal').innerHTML=`<div class="lterm-init" id="ltermInit"><div><span class="cursor-blink"></span> Fetching from NewsAPI...</div></div>`;
   document.getElementById('artList').innerHTML='';
   document.getElementById('termDot').classList.remove('idle');
   document.getElementById('termStatus').textContent='FETCHING';
-  document.getElementById('feedTs').textContent=`Refreshing via GDELT...`;
+  document.getElementById('feedTs').textContent='· connecting to NewsAPI...';
   fetchNews();
 }
 
