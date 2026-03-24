@@ -110,73 +110,91 @@ a{color:inherit;text-decoration:none}
   padding:0;position:relative;overflow:hidden;
 }
 .hero-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-.hero-card.w::after{background:linear-gradient(90deg,var(--red) 0%,var(--orange) 35%,var(--yellow) 60%,var(--green) 100%)}
+/* Bar reflects score zones: ceasefire→de-escal→active→high→full war */
+.hero-card.w::after{background:linear-gradient(90deg,var(--green) 0%,var(--teal) 10%,var(--yellow) 30%,var(--orange) 60%,var(--red) 100%)}
 .hero-card.a::after{background:var(--yellow)}
 
-/* 3-column layout inside the main hero */
-.hero-grid{display:grid;grid-template-columns:1fr 1px 1fr 1px 260px}
-.hero-divider{background:var(--b1);margin:24px 0}
-.hero-col{padding:28px 32px}
-.hero-col.center{padding:28px 28px}
-.hero-col.right{padding:24px 28px;display:flex;flex-direction:column;gap:14px}
-
-/* War score column */
 .hc-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--t3);margin-bottom:12px}
 .hc-val{font-size:72px;font-weight:800;letter-spacing:-.04em;line-height:1}
 .hc-val.w{color:var(--green)}
 .hc-val.a{color:var(--yellow)}
-
-/* Intensity bar */
-.intensity-bar-wrap{margin-top:16px}
-.intensity-bar-labels{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--t3);margin-bottom:5px}
-.intensity-bar-track{height:6px;background:var(--b2);border-radius:3px;position:relative;overflow:visible}
-.intensity-bar-fill{
-  height:100%;border-radius:3px;
-  background:linear-gradient(90deg,var(--green),var(--yellow) 50%,var(--red));
-  background-size:580px 100%;
-  transition:width .8s cubic-bezier(.4,0,.2,1);
-}
-.intensity-bar-marker{
-  position:absolute;top:-3px;
-  width:2px;height:12px;background:var(--t1);border-radius:1px;
-  box-shadow:0 0 6px rgba(255,255,255,.4);
-  transform:translateX(-50%);
-}
-
-/* Countdown column (center) */
-.countdown-block{text-align:center}
-.cdb-num{
-  font-size:96px;font-weight:800;letter-spacing:-.05em;line-height:1;
-  color:var(--orange);
-}
-.cdb-unit{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--t2);margin-top:4px}
-.cdb-deadline{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);margin-top:8px}
-.cdb-what{font-size:12px;color:var(--t2);margin-top:10px;line-height:1.5;max-width:220px;margin-inline:auto}
-
-/* Right column: key signals */
-.signal-row{display:flex;flex-direction:column;gap:3px}
-.signal-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
-.signal-val{font-size:13px;font-weight:600;color:var(--t1)}
-.signal-meta{font-size:11px;color:var(--t2)}
-.hero-bottom-bar{
-  padding:14px 32px;border-top:1px solid var(--b1);
-  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
-}
-.hc-sub{font-size:12px;color:var(--t2);line-height:1.6;flex:1}
 .hc-badge{
   display:inline-flex;align-items:center;gap:4px;
   font-family:'JetBrains Mono',monospace;font-size:9px;
-  padding:3px 8px;border-radius:100px;flex-shrink:0;
+  padding:3px 8px;border-radius:100px;
 }
 .hc-badge.dn{background:rgba(74,222,128,.08);color:var(--green);border:1px solid rgba(74,222,128,.18)}
 .hc-badge.up{background:rgba(240,82,82,.1);color:var(--red);border:1px solid rgba(240,82,82,.2)}
+.hc-sub{font-size:12px;color:var(--t2);line-height:1.6}
+
+/* ── Numbers row: Score ↔ Window ─── */
+.hw-numbers{display:grid;grid-template-columns:1fr auto 1fr;gap:0;padding:28px 32px 20px}
+.hw-score{display:flex;flex-direction:column}
+.hw-score-val{font-size:80px;font-weight:800;letter-spacing:-.05em;line-height:1;color:var(--green)}
+.hw-score-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);margin-top:6px;letter-spacing:.08em}
+
+.hw-connector{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:0 28px;gap:6px;
+}
+.hw-connector-rule{
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;
+  color:var(--t2);text-align:center;line-height:1.6;max-width:140px;
+}
+.hw-connector-arrow{font-size:18px;color:var(--b3)}
+
+.hw-window{display:flex;flex-direction:column;align-items:flex-end}
+.hw-window-val{font-size:80px;font-weight:800;letter-spacing:-.05em;line-height:1;color:var(--orange)}
+.hw-window-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);margin-top:6px;letter-spacing:.08em;text-align:right}
+
+/* ── Intensity bar with zones ─────── */
+.hw-bar-section{padding:0 32px 20px}
+.iz-bar{
+  height:10px;border-radius:5px;position:relative;
+  display:flex;overflow:hidden;
+}
+.iz-seg{height:100%;flex-shrink:0}
+.iz-marker{
+  position:absolute;top:-5px;width:3px;height:20px;
+  background:var(--t1);border-radius:2px;
+  box-shadow:0 0 8px rgba(255,255,255,.6);
+  transform:translateX(-50%);transition:left .8s cubic-bezier(.4,0,.2,1);
+  z-index:2;
+}
+.iz-peak-marker{
+  position:absolute;top:-3px;width:2px;height:16px;
+  background:rgba(240,82,82,.5);border-radius:1px;
+  transform:translateX(-50%);z-index:1;
+}
+.iz-zones{display:flex;margin-top:5px}
+.iz-zone-lbl{
+  font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--t3);
+  letter-spacing:.06em;text-align:center;flex-shrink:0;overflow:hidden;
+  white-space:nowrap;text-overflow:clip;
+}
+
+/* ── Verdict / pace strip ─────────── */
+.hw-verdict{
+  padding:14px 32px;border-top:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+}
+.hw-verdict-main{display:flex;align-items:center;gap:10px}
+.hw-on-track{
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;
+  padding:4px 10px;border-radius:100px;
+}
+.hw-on-track.ok{background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.25)}
+.hw-on-track.risk{background:rgba(250,204,21,.1);color:var(--yellow);border:1px solid rgba(250,204,21,.25)}
+.hw-on-track.danger{background:rgba(240,82,82,.1);color:var(--red);border:1px solid rgba(240,82,82,.25)}
+.hw-pace{font-size:12px;color:var(--t2)}
+.hw-pace strong{color:var(--t1)}
 
 /* Number flash animation */
 .hc-val.flash,.cdb-num.flash{animation:numflash .5s ease}
 
 /* ── REGIONAL ATTACKS ──────────────────────────────────────── */
 .regional-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
   background:var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:32px;
 }
 .rg-cell{background:var(--s1);padding:14px 16px}
@@ -563,26 +581,19 @@ body::after{
 .score-tick{font-size:11px;font-weight:600;margin-left:4px;transition:color .3s}
 
 /* ── RESPONSIVE ────────────────────────────────────────────── */
-@media(max-width:1024px){
-  .hero-grid{grid-template-columns:1fr 1px 1fr}
-  .hero-grid .hero-col.right{display:none}
-  .hero-grid .hero-divider:last-of-type{display:none}
-}
 @media(max-width:860px){
-  .hero-grid{grid-template-columns:1fr}
-  .hero-grid .hero-divider{display:none}
-  .hero-grid .hero-col{padding:20px 20px}
-  .hero-grid .hero-col.center{border-top:1px solid var(--b1)}
+  .hw-numbers{grid-template-columns:1fr 1fr;gap:16px}
+  .hw-connector{display:none}
+  .hw-window{align-items:flex-start}
+  .hw-window-sub{text-align:left}
   .hero-secondary{grid-template-columns:1fr}
-  .cdb-num{font-size:72px}
-  .hc-val{font-size:56px}
+  .hw-score-val,.hw-window-val{font-size:60px}
   .stats{grid-template-columns:repeat(3,1fr)}
   .regional-grid{grid-template-columns:repeat(2,1fr)}
   .page-hdr{grid-template-columns:1fr}
   .day-badge{display:none}
   .deadline-banner{flex-wrap:wrap;gap:10px}
-  .db-divider{display:none}
-  .db-right{display:none}
+  .db-divider,.db-right{display:none}
   .tl-main{grid-template-columns:72px 58px 1fr 24px}
 }
 @media(max-width:520px){
@@ -657,72 +668,66 @@ body::after{
     <div class="db-pill">⚑ DIPLOMATIC WINDOW ACTIVE</div>
   </div>
 
-  <!-- ╔═ PRIMARY HERO: REDESIGNED ══════════════════════════════╗ -->
+  <!-- ╔═ PRIMARY HERO: WAR SCORE ↔ WINDOW ════════════════════╗ -->
   <div class="hero-primary">
     <div class="hero-card w">
-      <div class="hero-grid">
 
-        <!-- Col 1: War Intensity Score + gauge -->
-        <div class="hero-col">
-          <div class="hc-lbl">Iran–US War Intensity — Live</div>
-          <div class="hc-val w" id="warScoreVal">25<span style="font-size:28px;font-weight:400;color:var(--t3)">/100</span></div>
-          <div style="font-size:12px;color:var(--t2);margin-top:8px">Active conflict · de-escalation phase</div>
-          <div class="intensity-bar-wrap">
-            <div class="intensity-bar-labels">
-              <span>CEASEFIRE</span>
-              <span>CURRENT</span>
-              <span>FULL WAR</span>
-            </div>
-            <div class="intensity-bar-track">
-              <div class="intensity-bar-fill" id="intensityFill" style="width:25%"></div>
-              <div class="intensity-bar-marker" id="intensityMarker" style="left:25%"></div>
-            </div>
-          </div>
-          <div class="hc-badge dn" id="warScoreBadge" style="margin-top:14px">↓ −70pts from peak 95 on Feb 28</div>
+      <!-- Two numbers, explicitly connected -->
+      <div class="hw-numbers">
+        <div class="hw-score">
+          <div class="hc-lbl">War Intensity Score — 0 = ceasefire · 100 = full war</div>
+          <div class="hw-score-val" id="warScoreVal">25</div>
+          <div class="hw-score-sub">/ 100 · DE-ESCALATING</div>
+          <div class="hc-badge dn" id="warScoreBadge" style="margin-top:12px">↓ from peak 95 on Feb 28</div>
         </div>
 
-        <div class="hero-divider"></div>
-
-        <!-- Col 2: De-escalation countdown -->
-        <div class="hero-col center" style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
-          <div class="hc-lbl" style="text-align:center">De-escalation window</div>
-          <div class="cdb-num" id="countdownNum">26</div>
-          <div class="cdb-unit">days remaining</div>
-          <div class="cdb-deadline">deadline · Apr 19, 2026</div>
-          <div class="cdb-what">If Islamabad talks reach framework agreement by deadline, ceasefire becomes likely within 10 days</div>
+        <div class="hw-connector">
+          <div class="hw-connector-arrow">→</div>
+          <div class="hw-connector-rule">score must reach<br>≤ 10 before this<br>window closes</div>
         </div>
 
-        <div class="hero-divider"></div>
-
-        <!-- Col 3: Key signals -->
-        <div class="hero-col right">
-          <div class="hc-lbl">Key Signals Now</div>
-          <div class="signal-row">
-            <div class="signal-label">Diplomacy</div>
-            <div class="signal-val" style="color:var(--green)">Talks Active</div>
-            <div class="signal-meta">Vance + Witkoff in Islamabad</div>
-          </div>
-          <div class="signal-row">
-            <div class="signal-label">Hormuz Strait</div>
-            <div class="signal-val" style="color:var(--yellow)">Restricted</div>
-            <div class="signal-meta">Partial tanker passage</div>
-          </div>
-          <div class="signal-row">
-            <div class="signal-label">Brent Crude</div>
-            <div class="signal-val" style="color:var(--green)">~$99</div>
-            <div class="signal-meta">↓ from $112 peak</div>
-          </div>
-          <div class="signal-row">
-            <div class="signal-label">Strike Activity</div>
-            <div class="signal-val" style="color:var(--orange)">Low</div>
-            <div class="signal-meta">8% of opening-day volume</div>
-          </div>
+        <div class="hw-window">
+          <div class="hc-lbl" style="text-align:right">De-escalation window</div>
+          <div class="hw-window-val" id="countdownNum">26</div>
+          <div class="hw-window-sub">DAYS REMAINING<br>DEADLINE · APR 19, 2026</div>
         </div>
-
       </div>
-      <div class="hero-bottom-bar">
-        <div class="hc-sub" id="warScoreSub">Vance + Witkoff + Kushner heading to Islamabad. Closest to formal talks since war began Feb 28. 5-day power plant pause now Day 2.</div>
+
+      <!-- Zoned intensity bar -->
+      <div class="hw-bar-section">
+        <div class="iz-bar">
+          <!-- Zones proportional to score range: ceasefire 0-10 / de-escal 10-25 / active 25-65 / high 65-85 / war 85-100 -->
+          <div class="iz-seg" style="width:10%;background:var(--green);opacity:.7"></div>
+          <div class="iz-seg" style="width:15%;background:var(--teal);opacity:.7"></div>
+          <div class="iz-seg" style="width:40%;background:linear-gradient(90deg,rgba(250,204,21,.7),rgba(251,146,60,.7))"></div>
+          <div class="iz-seg" style="width:20%;background:linear-gradient(90deg,rgba(251,146,60,.7),rgba(240,82,82,.7))"></div>
+          <div class="iz-seg" style="width:15%;background:rgba(240,82,82,.7)"></div>
+          <!-- Peak marker at 95% -->
+          <div class="iz-peak-marker" style="left:95%" title="Peak: 95 on Feb 28"></div>
+          <!-- Current position marker (updated by JS) -->
+          <div class="iz-marker" id="intensityMarker" style="left:25%"></div>
+        </div>
+        <!-- Zone labels -->
+        <div class="iz-zones">
+          <div class="iz-zone-lbl" style="width:10%;color:var(--green)">CEASEFIRE</div>
+          <div class="iz-zone-lbl" style="width:15%;color:var(--teal)">DE-ESCAL.</div>
+          <div class="iz-zone-lbl" style="width:40%;color:var(--yellow)">ACTIVE CONFLICT ← current</div>
+          <div class="iz-zone-lbl" style="width:20%;color:var(--orange)">HIGH</div>
+          <div class="iz-zone-lbl" style="width:15%;color:var(--red)">FULL WAR</div>
+        </div>
       </div>
+
+      <!-- Verdict: rate + projection + margin -->
+      <div class="hw-verdict">
+        <div class="hw-verdict-main">
+          <div class="hw-on-track ok" id="verdictBadge">✓ ON TRACK</div>
+          <div class="hw-pace" id="verdictText">
+            De-escalating at <strong id="rateText">↓ 2.9 pts/day</strong> · ceasefire zone in ~<strong id="projDays">9 days</strong> (Apr 1) · <strong id="marginText">17 days inside the window</strong>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--t2)" id="warScoreSub">Vance + Witkoff + Kushner heading to Islamabad</div>
+      </div>
+
     </div>
   </div>
 
@@ -743,6 +748,18 @@ body::after{
       <span class="sec-meta">Since Feb 28, 2026 · ballistic missiles + drones + cruise</span>
     </div>
     <div class="regional-grid">
+
+      <div class="rg-cell">
+        <div class="rg-country">UAE</div>
+        <div class="rg-role">Abu Dhabi · Al Dhafra Air Base · Dubai</div>
+        <div class="rg-row"><span class="rg-key">Today</span><span class="rg-val c-yl">7 BMs · 16 UAVs</span></div>
+        <div class="rg-row"><span class="rg-key">All-time</span><span class="rg-val c-red">352 BMs · 1,789 UAVs · 15 cruise</span></div>
+        <div class="rg-total">
+          <span class="rg-total-lbl">Total projectiles</span>
+          <span class="rg-total-val c-red">2,156</span>
+        </div>
+        <div><span class="rg-status hot">PRIMARY TARGET</span></div>
+      </div>
 
       <div class="rg-cell">
         <div class="rg-country">Iraq</div>
@@ -1906,6 +1923,15 @@ function animateValue(el,newText){
   el.innerHTML=newText;
 }
 
+// De-escalation rate: peak was 95 on Day 0 (Feb 28), today is Day 24 at 25
+const PEAK_SCORE=95, PEAK_DAY=0, TODAY_DAY=24;
+const CEASEFIRE_ZONE=10; // score ≤ 10 = ceasefire territory
+
+function calcDeescRate(currentScore){
+  const daysPassed=TODAY_DAY-PEAK_DAY;
+  return (PEAK_SCORE-currentScore)/daysPassed; // pts/day
+}
+
 function updateDeadlineCountdown(){
   const now=new Date();
   const msLeft=DEADLINE-now;
@@ -1914,18 +1940,45 @@ function updateDeadlineCountdown(){
   const cn=document.getElementById('countdownNum');
   if(el)el.textContent=daysLeft;
   if(cn)cn.textContent=daysLeft;
-  // Change color urgency as deadline approaches
   const color=daysLeft>20?'var(--orange)':daysLeft>10?'var(--yellow)':'var(--red)';
   if(el)el.style.color=color;
   if(cn)cn.style.color=color;
+  return daysLeft;
 }
 
 function updateIntensityBar(score){
-  const pct=Math.max(2,Math.min(98,score));
-  const fill=document.getElementById('intensityFill');
+  const pct=Math.max(1,Math.min(99,score));
   const marker=document.getElementById('intensityMarker');
-  if(fill)fill.style.width=`${pct}%`;
   if(marker)marker.style.left=`${pct}%`;
+}
+
+function updateVerdict(score, daysLeft){
+  const rate=calcDeescRate(score);
+  const daysToZone=rate>0?(score-CEASEFIRE_ZONE)/rate:999;
+  const margin=daysLeft-daysToZone;
+  const projDate=new Date();
+  projDate.setDate(projDate.getDate()+Math.ceil(daysToZone));
+  const projStr=projDate.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+
+  // Update verdict badge
+  const badge=document.getElementById('verdictBadge');
+  if(badge){
+    if(margin>10){badge.className='hw-on-track ok';badge.textContent='✓ ON TRACK';}
+    else if(margin>0){badge.className='hw-on-track risk';badge.textContent='⚠ AT RISK';}
+    else{badge.className='hw-on-track danger';badge.textContent='✗ OFF TRACK';}
+  }
+
+  // Update pace text
+  const rateEl=document.getElementById('rateText');
+  const projEl=document.getElementById('projDays');
+  const marginEl=document.getElementById('marginText');
+  if(rateEl)rateEl.textContent=`↓ ${rate.toFixed(1)} pts/day`;
+  if(projEl)projEl.textContent=daysToZone<daysLeft?`~${Math.ceil(daysToZone)} days (${projStr})`:'exceeds window';
+  if(marginEl){
+    if(margin>0)marginEl.textContent=`${Math.round(margin)} days inside the window`;
+    else marginEl.textContent=`${Math.round(-margin)} days past deadline`;
+    marginEl.style.color=margin>10?'var(--green)':margin>0?'var(--yellow)':'var(--red)';
+  }
 }
 
 function updateLiveScores(){
@@ -1973,7 +2026,8 @@ function updateLiveScores(){
   }
 
   prevAbu=abuRnd; prevWar=warRnd;
-  updateDeadlineCountdown();
+  const daysLeft=updateDeadlineCountdown();
+  updateVerdict(warRnd, daysLeft);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1991,8 +2045,9 @@ fetchAllSourcesParallel();
 setInterval(fetchNextSource, 15*1000);
 
 // Live score + countdown update every 5 seconds
-updateDeadlineCountdown();
+const initDaysLeft=updateDeadlineCountdown();
 updateIntensityBar(25);
+updateVerdict(25, initDaysLeft);
 setInterval(updateLiveScores, 5000);
 
 const now=new Date();
