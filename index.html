@@ -566,7 +566,10 @@ body::after{
 
 /* ── RESPONSIVE ────────────────────────────────────────────── */
 @media(max-width:860px){
-  .hw-header{flex-direction:column;align-items:flex-start}
+  .hw-header{flex-direction:column;align-items:flex-start;padding:20px 20px 16px}
+  .hw-timeline{padding:0 20px 6px}
+  .hw-verdict{padding:12px 20px}
+  .hw-status-sub{max-width:100%}
   .hero-secondary{grid-template-columns:1fr}
   .stats{grid-template-columns:repeat(3,1fr)}
   .regional-grid{grid-template-columns:repeat(2,1fr)}
@@ -577,23 +580,52 @@ body::after{
   .tl-main{grid-template-columns:72px 58px 1fr 24px}
 }
 @media(max-width:520px){
+  /* Topbar: hide operation label, keep brand + clock only */
+  .topbar{padding:0 14px}
+  .topbar-status,.pipe{display:none}
+  .topbar-r .ts{display:none}
+
+  /* Wrap */
+  .wrap{padding:16px 12px 60px}
+
+  /* Hero score: scale down the 72px inline number */
+  #warScoreVal{font-size:48px!important;letter-spacing:-.04em!important}
+  #warScoreVal span{font-size:20px!important}
+  .hw-header{padding:16px 16px 14px;gap:10px}
+  .hw-status-label{font-size:16px}
+  .hw-status-sub{max-width:100%;font-size:11px}
+
+  /* Timeline: hide float labels (they overlap at 320px), compact the track */
+  .hwt-lbl{display:none}
+  .hw-timeline{padding:0 16px 4px}
+  .hwt-outer{height:30px}
+  .hwt-track{top:12px}
+  .hwt-dot{top:6px;width:8px;height:8px}
+  .hwt-dot.today{top:5px;width:10px;height:10px}
+  .hwt-ticks{font-size:8px}
+  .hw-verdict{padding:10px 16px;flex-direction:column;align-items:flex-start;gap:8px}
+  .hw-pace{font-size:11px}
+
+  /* Stats */
+  .stats{grid-template-columns:repeat(2,1fr)}
   .regional-grid{grid-template-columns:1fr}
-  .wrap{padding:16px 12px 60px}
-  .stats{grid-template-columns:repeat(2,1fr)}
+
+  /* Timeline rows */
   .tl-sum{display:none}
   .tl.open .tl-detail{grid-template-columns:1fr}
-  .explainer .tier{grid-template-columns:1fr}
-  .topbar-r .ts{display:none}
+  .tl-main{grid-template-columns:68px 50px 1fr 22px;gap:8px;padding:11px 12px}
+
+  /* Sentiment terminal: drop source + tag columns, just show time · icon · headline */
+  .tl-line{grid-template-columns:58px 18px 1fr;padding:6px 12px;gap:6px}
+  .tl-ctag,.tl-src{display:none}
+  .sent-counts{display:none}
+  .sent-track-wrap{min-width:100px}
+
+  /* Today terminal */
   .t-row{grid-template-columns:56px 68px 1fr}
-}
-@media(max-width:520px){
-  .wrap{padding:16px 12px 60px}
-  .stats{grid-template-columns:repeat(2,1fr)}
-  .tl-sum{display:none}
-  .tl.open .tl-detail{grid-template-columns:1fr}
+
+  /* Explainer */
   .explainer .tier{grid-template-columns:1fr}
-  .topbar-r .ts{display:none}
-  .t-row{grid-template-columns:56px 68px 1fr}
 }
 </style>
 </head>
@@ -668,11 +700,9 @@ body::after{
           <div class="hwt-dot projected" id="hwProjDot" style="left:64%"></div>
           <div class="hwt-dot deadline" style="right:0;left:auto;transform:translateX(50%)"></div>
 
-          <!-- Labels above dots -->
-          <div class="hwt-lbl above start" style="left:0%">FULL WAR · 95/100</div>
-          <div class="hwt-lbl above" id="hwTodayLbl" style="left:48%">TODAY · <span id="hwTodayScore">25</span>/100</div>
-          <div class="hwt-lbl above" id="hwProjLbl" style="left:64%">PROJ. CEASEFIRE</div>
-          <div class="hwt-lbl above deadline" style="right:0">WINDOW CLOSES</div>
+          <!-- Milestone labels — kept minimal, date ticks + verdict strip tell the full story -->
+          <div class="hwt-lbl above" id="hwTodayLbl" style="left:48%">TODAY</div>
+          <div class="hwt-lbl above" id="hwProjLbl" style="left:64%">EST. CEASEFIRE</div>
         </div>
         <!-- Date ticks below -->
         <div class="hwt-ticks">
@@ -823,7 +853,7 @@ body::after{
         <div class="chart-ttl">Iran–US War Intensity Score (1–100)</div>
         <div class="chart-meta">25 today · peak 95 on Feb 28</div>
       </div>
-      <div class="chart-body"><svg class="ch" id="chartWar" viewBox="0 0 1160 160" preserveAspectRatio="none"></svg></div>
+      <div class="chart-body" style="position:relative"><svg class="ch" id="chartWar" viewBox="0 0 580 160"></svg></div>
     </div>
   </div>
 
@@ -950,7 +980,7 @@ body::after{
           <div class="chart-ttl">Abu Dhabi Attack Probability (%)</div>
           <div class="chart-meta">42% today · peak 97% on Feb 28</div>
         </div>
-        <div class="chart-body"><svg class="ch" id="chartAbu" viewBox="0 0 1160 160" preserveAspectRatio="none"></svg></div>
+        <div class="chart-body" style="position:relative"><svg class="ch" id="chartAbu" viewBox="0 0 580 160"></svg></div>
       </div>
     </div>
   </div>
@@ -1960,14 +1990,10 @@ function updateTimeline(score, daysLeft){
   const pd=document.getElementById('hwProjDot');
   const tl=document.getElementById('hwTodayLbl');
   const pl=document.getElementById('hwProjLbl');
-  const ts=document.getElementById('hwTodayScore');
-  const rd=document.getElementById('rateDisplay');
   if(td)td.style.left=`${todayPct}%`;
   if(pd)pd.style.left=`${projPct}%`;
   if(tl)tl.style.left=`${todayPct}%`;
   if(pl)pl.style.left=`${projPct}%`;
-  if(ts)ts.textContent=Math.round(score);
-  if(rd)rd.textContent=`↓${rate.toFixed(1)}`;
 
   // Verdict
   const margin=daysLeft-daysToZone;
