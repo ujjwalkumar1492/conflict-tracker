@@ -704,12 +704,12 @@ body::after{
           <div class="hwt-lbl above" id="hwTodayLbl" style="left:48%">TODAY</div>
           <div class="hwt-lbl above" id="hwProjLbl" style="left:64%">EST. CEASEFIRE</div>
         </div>
-        <!-- Date ticks below -->
-        <div class="hwt-ticks">
-          <span>Feb 28</span>
-          <span>Mar 25 (today)</span>
-          <span id="hwProjDate">~Apr 1</span>
-          <span>Apr 19</span>
+        <!-- Date ticks below — only fixed endpoints; dynamic dates injected by JS -->
+        <div class="hwt-ticks" style="position:relative;height:14px">
+          <span style="position:absolute;left:0">Feb 28</span>
+          <span id="hwTodayTick" style="position:absolute;transform:translateX(-50%);color:var(--t2)"></span>
+          <span id="hwProjDate" style="position:absolute;transform:translateX(-50%);color:var(--teal)"></span>
+          <span style="position:absolute;right:0">Apr 19</span>
         </div>
       </div>
 
@@ -1399,7 +1399,7 @@ function buildChart(id,data,valueKey,lineColor){
     h+=`<text x="${pt.l+2}" y="${ys(100)+10}" fill="#4ade80" font-size="7.5" font-family="JetBrains Mono,monospace">PEACE</text>`;
     // Ceasefire threshold line at 90
     h+=`<line x1="${pt.l}" y1="${ys(90)}" x2="${W-pt.r}" y2="${ys(90)}" stroke="#22d3ee" stroke-width="1" stroke-dasharray="4,3" opacity=".4"/>`;
-    h+=`<text x="${W-pt.r-2}" y="${ys(90)-3}" fill="#22d3ee" font-size="7.5" text-anchor="end" font-family="JetBrains Mono,monospace">CEASEFIRE ZONE ≥90</text>`;
+    h+=`<text x="${pt.l+2}" y="${ys(90)-3}" fill="#22d3ee" font-size="7.5" font-family="JetBrains Mono,monospace">CEASEFIRE ≥90</text>`;
   } else {
     h+=`<text x="${pt.l-4}" y="${ys(0)+3}" fill="#3a3a3a" font-size="8" text-anchor="end" font-family="JetBrains Mono,monospace">0</text>`;
     h+=`<text x="${pt.l-4}" y="${ys(100)+3}" fill="#3a3a3a" font-size="8" text-anchor="end" font-family="JetBrains Mono,monospace">100</text>`;
@@ -1417,11 +1417,14 @@ function buildChart(id,data,valueKey,lineColor){
   // Today marker
   const li=vals.length-1;
   h+=`<line x1="${xs(li)}" y1="${pt.t}" x2="${xs(li)}" y2="${pt.t+ih}" stroke="#818cf8" stroke-width="1" stroke-dasharray="3,3" opacity=".5"/>`;
-  h+=`<text x="${xs(li)-3}" y="${pt.t+9}" fill="#818cf8" font-size="8" text-anchor="end" font-family="JetBrains Mono,monospace">TODAY</text>`;
+  // TODAY label below the line to avoid collision with top-axis labels
+  h+=`<text x="${xs(li)-3}" y="${pt.t+ih-4}" fill="#818cf8" font-size="8" text-anchor="end" font-family="JetBrains Mono,monospace">TODAY</text>`;
 
-  // Date ticks every 4
+  // Date ticks every 4 — skip if too close to the last point
   arr.forEach((d,i)=>{
-    if(i%4===0||i===arr.length-1){
+    const isLast=i===arr.length-1;
+    const nearLast=!isLast&&(xs(arr.length-1)-xs(i))<32;
+    if((i%4===0&&!nearLast)||isLast){
       h+=`<circle cx="${xs(i)}" cy="${ys(d[valueKey])}" r="2.5" fill="${lineColor}" opacity=".8"/>`;
       h+=`<text x="${xs(i)}" y="${H-5}" fill="#3a3a3a" font-size="8" text-anchor="middle" font-family="JetBrains Mono,monospace">${d.d.replace('2026-','')}</text>`;
     }
@@ -2110,10 +2113,14 @@ function updateTimeline(score, daysLeft){
   const pd=document.getElementById('hwProjDot');
   const tl=document.getElementById('hwTodayLbl');
   const pl=document.getElementById('hwProjLbl');
+  const tt=document.getElementById('hwTodayTick');
   if(td)td.style.left=`${todayPct}%`;
   if(pd)pd.style.left=`${projPct}%`;
   if(tl)tl.style.left=`${todayPct}%`;
   if(pl)pl.style.left=`${projPct}%`;
+  // Tick labels below track — positioned to match dots
+  if(tt){tt.style.left=`${todayPct}%`;tt.textContent=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'});}
+
 
   // Verdict
   const margin=daysLeft-daysToZone;
@@ -2131,7 +2138,7 @@ function updateTimeline(score, daysLeft){
   }
   if(rateEl)rateEl.textContent=`↑ ${rate.toFixed(1)} pts/day`;
   if(projEl)projEl.textContent=`~${projStr}`;
-  if(projDateEl)projDateEl.textContent=`~${projStr}`;
+  if(projDateEl){projDateEl.textContent=`~${projStr}`;projDateEl.style.left=`${projPct}%`;}
   if(marginEl){
     if(margin>0){marginEl.textContent=`${Math.round(margin)} days before the Apr 19 deadline`;marginEl.style.color='var(--green)';}
     else{marginEl.textContent=`${Math.round(-margin)} days past deadline`;marginEl.style.color='var(--red)';}
