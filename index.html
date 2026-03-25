@@ -101,17 +101,13 @@ a{color:inherit;text-decoration:none}
 
 /* ── Status header row ────────────── */
 .hw-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:24px 32px 20px;gap:24px;flex-wrap:wrap;
+  display:flex;align-items:flex-start;
+  padding:24px 32px 20px;gap:16px;
 }
 .hw-status-label{
-  font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--teal);
+  font-size:20px;font-weight:700;letter-spacing:-.01em;color:var(--teal);
 }
-.hw-status-sub{font-size:12px;color:var(--t2);margin-top:4px}
-.hw-header-stats{display:flex;gap:24px;flex-shrink:0}
-.hw-hstat{text-align:right}
-.hw-hstat-val{font-size:22px;font-weight:700;letter-spacing:-.03em}
-.hw-hstat-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:.08em;margin-top:2px}
+.hw-status-sub{font-size:12px;color:var(--t2);margin-top:6px;max-width:640px;line-height:1.5}
 
 /* ── Conflict journey timeline ────── */
 .hw-timeline{padding:0 32px 6px;position:relative}
@@ -571,7 +567,6 @@ body::after{
 /* ── RESPONSIVE ────────────────────────────────────────────── */
 @media(max-width:860px){
   .hw-header{flex-direction:column;align-items:flex-start}
-  .hw-header-stats{gap:16px}
   .hero-secondary{grid-template-columns:1fr}
   .stats{grid-template-columns:repeat(3,1fr)}
   .regional-grid{grid-template-columns:repeat(2,1fr)}
@@ -639,26 +634,18 @@ body::after{
   <div class="hero-primary">
     <div class="hero-card w">
 
-      <!-- Status + key stats -->
+      <!-- Status + single war score -->
       <div class="hw-header">
-        <div>
-          <div class="hc-lbl">Iran–US Conflict — Live Status</div>
-          <div class="hw-status-label" id="statusLabel">DE-ESCALATING</div>
+        <div style="flex:1;min-width:0">
+          <div class="hc-lbl">Iran–US Conflict — War Intensity Score · Live</div>
+          <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px">
+            <div class="hw-hstat-val" id="warScoreVal" style="color:var(--green);font-size:72px;font-weight:800;letter-spacing:-.05em;line-height:1">25<span style="font-size:28px;font-weight:400;color:var(--t3)">/100</span></div>
+            <div>
+              <div class="hw-status-label" id="statusLabel" style="font-size:20px">DE-ESCALATING</div>
+              <div class="hc-badge dn" id="warScoreBadge" style="margin-top:6px;display:inline-flex">↓ from peak 95 on Feb 28</div>
+            </div>
+          </div>
           <div class="hw-status-sub" id="warScoreSub">Vance + Witkoff + Kushner heading to Islamabad. 5-day power plant pause in effect.</div>
-        </div>
-        <div class="hw-header-stats">
-          <div class="hw-hstat">
-            <div class="hw-hstat-val" id="warScoreVal" style="color:var(--green)">25<span style="font-size:14px;font-weight:400;color:var(--t3)">/100</span></div>
-            <div class="hw-hstat-lbl">WAR INTENSITY NOW</div>
-          </div>
-          <div class="hw-hstat">
-            <div class="hw-hstat-val" id="countdownNum" style="color:var(--orange)">26</div>
-            <div class="hw-hstat-lbl">DAYS TO DEADLINE</div>
-          </div>
-          <div class="hw-hstat">
-            <div class="hw-hstat-val" id="rateDisplay" style="color:var(--teal)">↓2.9</div>
-            <div class="hw-hstat-lbl">PTS/DAY RATE</div>
-          </div>
         </div>
       </div>
 
@@ -2004,7 +1991,7 @@ function updateTimeline(score, daysLeft){
     else{marginEl.textContent=`${Math.round(-margin)} days past deadline`;marginEl.style.color='var(--red)';}
   }
 
-  // Status label color
+  // Status label + war score number color
   const sl=document.getElementById('statusLabel');
   if(sl){
     if(score<15){sl.textContent='NEAR CEASEFIRE';sl.style.color='var(--green)';}
@@ -2016,51 +2003,62 @@ function updateTimeline(score, daysLeft){
 }
 
 function updateLiveScores(){
-  const sentimentPush=-smoothedSent*0.08;
-  const noise=(Math.random()-0.48)*0.8;
-  const abuRevert=(42-liveAbuProb)*0.004;
-  const warRevert=(25-liveWarScore)*0.003;
+  // Sentiment push: stronger effect so the score actually moves with the news
+  // smoothedSent range: -10 (escalation) to +10 (de-escalation)
+  // At max de-escalation (+10): push = -10*0.35 = -3.5 pts per tick (score drops)
+  // At max escalation (-10):    push = +10*0.35 = +3.5 pts per tick (score rises)
+  const sentimentPush = -smoothedSent * 0.35;
 
-  liveAbuProb=Math.max(5,Math.min(90, liveAbuProb+sentimentPush*1.4+noise+abuRevert));
-  liveWarScore=Math.max(3,Math.min(90, liveWarScore+sentimentPush*0.9+noise*0.7+warRevert));
+  // Small noise for organic feel (±0.5)
+  const noise = (Math.random() - 0.5) * 1.0;
 
-  const abuRnd=Math.round(liveAbuProb);
-  const warRnd=Math.round(liveWarScore);
+  // Very light mean reversion — only nudges, doesn't dominate
+  const warRevert = (25 - liveWarScore) * 0.001;
+  const abuRevert = (42 - liveAbuProb) * 0.001;
 
-  // ── War score + intensity bar ────────────────────────────
-  const warEl=document.getElementById('warScoreVal');
-  if(warEl) animateValue(warEl,`${warRnd}<span style="font-size:28px;font-weight:400;color:var(--t3)">/100</span>`);
-  updateIntensityBar(warRnd);
-  const warBadge=document.getElementById('warScoreBadge');
+  liveWarScore = Math.max(3, Math.min(90, liveWarScore + sentimentPush + noise * 0.6 + warRevert));
+  liveAbuProb  = Math.max(5, Math.min(90, liveAbuProb  + sentimentPush * 1.3 + noise + abuRevert));
+
+  const warRnd = Math.round(liveWarScore);
+  const abuRnd = Math.round(liveAbuProb);
+
+  // ── War score ────────────────────────────────────────────
+  const warEl = document.getElementById('warScoreVal');
+  if(warEl){
+    const scoreColor = warRnd < 20 ? 'var(--green)' : warRnd < 40 ? 'var(--teal)' : warRnd < 65 ? 'var(--yellow)' : warRnd < 80 ? 'var(--orange)' : 'var(--red)';
+    animateValue(warEl, `<span style="color:${scoreColor}">${warRnd}</span><span style="font-size:28px;font-weight:400;color:var(--t3)">/100</span>`);
+  }
+
+  const warBadge = document.getElementById('warScoreBadge');
   if(warBadge){
-    const diff=warRnd-prevWar;
-    const sign=diff>0?`↑ +${diff}pts`:diff<0?`↓ ${diff}pts`:`→ stable`;
-    warBadge.className=`hc-badge ${diff>0?'up':'dn'}`;
-    warBadge.textContent=`${sign} in last 5 min · LIVE`;
+    const diff = warRnd - prevWar;
+    const sign = diff > 0 ? `↑ +${diff}pts` : diff < 0 ? `↓ ${diff}pts` : `→ stable`;
+    warBadge.className = `hc-badge ${diff > 0 ? 'up' : 'dn'}`;
+    warBadge.textContent = `${sign} · updating live`;
   }
 
   // ── Abu Dhabi (secondary) ────────────────────────────────
-  const abuEl=document.getElementById('abuProbVal');
-  if(abuEl) animateValue(abuEl,`${abuRnd}%`);
-  const abuBadge=document.getElementById('abuProbBadge');
+  const abuEl = document.getElementById('abuProbVal');
+  if(abuEl) animateValue(abuEl, `${abuRnd}%`);
+  const abuBadge = document.getElementById('abuProbBadge');
   if(abuBadge){
-    const diff=abuRnd-prevAbu;
-    const sign=diff>0?`↑ +${diff}pp`:diff<0?`↓ ${diff}pp`:`→ stable`;
-    abuBadge.className=`hc-badge ${diff>0?'up':'dn'}`;
-    abuBadge.textContent=`${sign} in last 5 min · LIVE`;
+    const diff = abuRnd - prevAbu;
+    const sign = diff > 0 ? `↑ +${diff}pp` : diff < 0 ? `↓ ${diff}pp` : `→ stable`;
+    abuBadge.className = `hc-badge ${diff > 0 ? 'up' : 'dn'}`;
+    abuBadge.textContent = `${sign} · updating live`;
   }
 
-  // ── Latest headline in subtext ───────────────────────────
-  const latest=articlePool.find(a=>isRelevant(a.title,''));
+  // ── Latest relevant headline in subtext ─────────────────
+  const latest = articlePool.find(a => isRelevant(a.title, ''));
   if(latest){
-    const ws=document.getElementById('warScoreSub');
-    const as=document.getElementById('abuProbSub');
-    if(ws)ws.textContent=latest.title;
-    if(as)as.textContent=latest.title;
+    const ws = document.getElementById('warScoreSub');
+    const as = document.getElementById('abuProbSub');
+    if(ws) ws.textContent = latest.title;
+    if(as) as.textContent = latest.title;
   }
 
-  prevAbu=abuRnd; prevWar=warRnd;
-  const daysLeft=updateDeadlineCountdown();
+  prevAbu = abuRnd; prevWar = warRnd;
+  const daysLeft = updateDeadlineCountdown();
   updateTimeline(warRnd, daysLeft);
 }
 
