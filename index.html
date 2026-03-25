@@ -2158,15 +2158,15 @@ function updateTimeline(score, daysLeft){
 function updateLiveScores(){
   // Positive sentiment (de-escalation news) → score rises toward 100 (peace)
   // Negative sentiment (escalation news) → score drops toward 0 (full war)
-  const sentimentPush = smoothedSent * 0.35;
+  const sentimentPush = smoothedSent * 1.2;
 
-  const noise = (Math.random() - 0.5) * 1.0;
+  const noise = (Math.random() - 0.5) * 5;
 
-  // Very light mean reversion back toward current day's value
-  const warRevert = (75 - liveWarScore) * 0.001;
-  const abuRevert = (42 - liveAbuProb) * 0.001;
+  // Mean reversion toward today's anchor — keeps score from drifting permanently
+  const warRevert = (75 - liveWarScore) * 0.04;
+  const abuRevert = (42 - liveAbuProb) * 0.04;
 
-  liveWarScore = Math.max(1, Math.min(99, liveWarScore + sentimentPush + noise * 0.6 + warRevert));
+  liveWarScore = Math.max(1, Math.min(99, liveWarScore + sentimentPush + noise * 1.2 + warRevert));
   liveAbuProb  = Math.max(5, Math.min(90, liveAbuProb  - sentimentPush * 1.3 + noise + abuRevert));
 
   const warRnd = Math.round(liveWarScore);
