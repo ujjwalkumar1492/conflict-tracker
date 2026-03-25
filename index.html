@@ -2117,7 +2117,7 @@ function updateTimeline(score, daysLeft){
   if(td)td.style.left=`${todayPct}%`;
   if(pd)pd.style.left=`${projPct}%`;
   if(tl)tl.style.left=`${todayPct}%`;
-  if(pl)pl.style.left=`${projPct}%`;
+  if(pl){pl.style.left=`${projPct}%`;pl.textContent=`EST. CEASEFIRE · ~${Math.round(daysToZone)}d`;}
   // Tick labels below track — positioned to match dots
   if(tt){tt.style.left=`${todayPct}%`;tt.textContent=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'});}
 
