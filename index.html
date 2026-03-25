@@ -1361,6 +1361,7 @@ function buildToday(){
 ═══════════════════════════════════════════════════════════════ */
 function buildChart(id,data,valueKey,lineColor){
   const svg=document.getElementById(id);
+  if(!svg)return;
   const W=580,H=160,pt={t:14,b:24,l:28,r:10};
   const iw=W-pt.l-pt.r,ih=H-pt.t-pt.b;
   const arr=[...data].reverse(); // oldest→newest for chart
@@ -1368,36 +1369,116 @@ function buildChart(id,data,valueKey,lineColor){
   const xs=i=>pt.l+(i/(vals.length-1))*iw;
   const ys=v=>pt.t+(1-v/100)*ih;
   const gid='g'+id;
+  const isAbu=!!(data[0]?.out);
+
   let h=`<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0%" stop-color="${lineColor}" stop-opacity=".2"/>
     <stop offset="100%" stop-color="${lineColor}" stop-opacity="0"/>
   </linearGradient></defs>`;
-  // Grid
+
+  // Grid lines
   [25,50,75].forEach(v=>{
     const y=ys(v);
     h+=`<line x1="${pt.l}" y1="${y}" x2="${W-pt.r}" y2="${y}" stroke="#1a1a1a" stroke-width="1"/>`;
     h+=`<text x="${pt.l-4}" y="${y+3}" fill="#3a3a3a" font-size="8" text-anchor="end" font-family="JetBrains Mono,monospace">${v}</text>`;
   });
-  if(valueKey==='v'&&data[0]?.out){ // abu dhabi — 50% line
+  if(isAbu){
     h+=`<line x1="${pt.l}" y1="${ys(50)}" x2="${W-pt.r}" y2="${ys(50)}" stroke="#facc15" stroke-width="1" stroke-dasharray="3,3" opacity=".3"/>`;
   }
-  // Area
+
+  // Area fill
   const pts=vals.map((v,i)=>`${xs(i)},${ys(v)}`).join(' ');
   h+=`<polygon points="${pt.l},${pt.t+ih} ${pts} ${W-pt.r},${pt.t+ih}" fill="url(#${gid})"/>`;
+
   // Line
   h+=`<path d="${vals.map((v,i)=>`${i===0?'M':'L'}${xs(i)},${ys(v)}`).join(' ')}" fill="none" stroke="${lineColor}" stroke-width="1.75" stroke-linejoin="round"/>`;
+
   // Today marker
   const li=vals.length-1;
   h+=`<line x1="${xs(li)}" y1="${pt.t}" x2="${xs(li)}" y2="${pt.t+ih}" stroke="#818cf8" stroke-width="1" stroke-dasharray="3,3" opacity=".5"/>`;
   h+=`<text x="${xs(li)-3}" y="${pt.t+9}" fill="#818cf8" font-size="8" text-anchor="end" font-family="JetBrains Mono,monospace">TODAY</text>`;
-  // Dots every 4
+
+  // Date ticks every 4 points
   arr.forEach((d,i)=>{
     if(i%4===0||i===arr.length-1){
       h+=`<circle cx="${xs(i)}" cy="${ys(d[valueKey])}" r="2.5" fill="${lineColor}" opacity=".8"/>`;
       h+=`<text x="${xs(i)}" y="${H-5}" fill="#3a3a3a" font-size="8" text-anchor="middle" font-family="JetBrains Mono,monospace">${d.d.replace('2026-','')}</text>`;
     }
   });
+
+  // ── Hover layer (rendered on top) ──────────────────────────
+  // Crosshair
+  h+=`<line id="${id}_vline" x1="0" y1="${pt.t}" x2="0" y2="${pt.t+ih}" stroke="rgba(255,255,255,.12)" stroke-width="1" stroke-dasharray="3,2" visibility="hidden"/>`;
+  // Active dot
+  h+=`<circle id="${id}_dot" r="4.5" fill="${lineColor}" stroke="#080808" stroke-width="2" visibility="hidden"/>`;
+  // Tooltip card: bg rect + 3 text lines
+  h+=`<rect id="${id}_trect" rx="5" ry="5" fill="#161616" stroke="#2a2a2a" stroke-width="1" visibility="hidden"/>`;
+  h+=`<text id="${id}_t1" font-size="9" font-family="JetBrains Mono,monospace" fill="#484848" visibility="hidden"/>`;
+  h+=`<text id="${id}_t2" font-size="14" font-weight="700" font-family="JetBrains Mono,monospace" fill="${lineColor}" visibility="hidden"/>`;
+  h+=`<text id="${id}_t3" font-size="9" font-family="JetBrains Mono,monospace" fill="#606060" visibility="hidden"/>`;
+  // Invisible hit area over the plot region
+  h+=`<rect id="${id}_hit" x="${pt.l}" y="${pt.t}" width="${iw}" height="${ih}" fill="transparent" style="cursor:crosshair"/>`;
+
   svg.innerHTML=h;
+
+  // Grab all hover elements
+  const vline  = svg.querySelector(`#${id}_vline`);
+  const dot    = svg.querySelector(`#${id}_dot`);
+  const trect  = svg.querySelector(`#${id}_trect`);
+  const t1     = svg.querySelector(`#${id}_t1`);
+  const t2     = svg.querySelector(`#${id}_t2`);
+  const t3     = svg.querySelector(`#${id}_t3`);
+  const hit    = svg.querySelector(`#${id}_hit`);
+
+  const SHOW=['vline','dot','trect','t1','t2','t3'].map(k=>svg.querySelector(`#${id}_${k}`));
+  const setVis=v=>SHOW.forEach(el=>el&&el.setAttribute('visibility',v?'visible':'hidden'));
+
+  function onMove(clientX){
+    const rect=svg.getBoundingClientRect();
+    // Map client px → SVG coordinate space (viewBox=0 0 580 160)
+    const svgX=(clientX-rect.left)/rect.width*W;
+
+    // Nearest data index
+    let best=0,bestD=Infinity;
+    arr.forEach((_,i)=>{const d=Math.abs(xs(i)-svgX);if(d<bestD){bestD=d;best=i;}});
+
+    const d=arr[best];
+    const score=d[valueKey];
+    const cx=xs(best), cy=ys(score);
+    const label=isAbu?`${score}%`:`${score}/100`;
+    const hl=(d.hl||'').slice(0,52)+((d.hl||'').length>52?'…':'');
+
+    // Crosshair + dot
+    vline.setAttribute('x1',cx); vline.setAttribute('x2',cx);
+    dot.setAttribute('cx',cx);   dot.setAttribute('cy',cy);
+
+    // Measure text widths approximately
+    const tw=Math.max(label.length*8+16, hl.length*5.4+16, 80);
+    const th=56; // fixed card height: date + score + headline
+    const PAD=8, GAP=10;
+    let tx=cx+GAP;
+    if(tx+tw>W-pt.r-2) tx=cx-tw-GAP;
+    const ty=Math.max(pt.t+2, Math.min(cy-th/2, pt.t+ih-th-2));
+
+    trect.setAttribute('x',tx); trect.setAttribute('y',ty);
+    trect.setAttribute('width',tw); trect.setAttribute('height',th);
+
+    t1.setAttribute('x',tx+PAD); t1.setAttribute('y',ty+PAD+8);
+    t1.textContent=`${d.d}  ·  ${d.day||''}`;
+
+    t2.setAttribute('x',tx+PAD); t2.setAttribute('y',ty+PAD+22);
+    t2.textContent=label;
+
+    t3.setAttribute('x',tx+PAD); t3.setAttribute('y',ty+PAD+36);
+    t3.textContent=hl;
+
+    setVis(true);
+  }
+
+  hit.addEventListener('mousemove', e=>onMove(e.clientX));
+  hit.addEventListener('mouseleave', ()=>setVis(false));
+  hit.addEventListener('touchmove',  e=>{e.preventDefault();onMove(e.touches[0].clientX);},{passive:false});
+  hit.addEventListener('touchend',   ()=>setVis(false));
 }
 
 /* ═══════════════════════════════════════════════════════════════
